@@ -33,8 +33,44 @@
         height: auto;
         object-fit: cover;
     }
+    /* Back btn style*/
+    .btn-back {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 18px;
+        background-color: #fdfdfd;
+        color: #555;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 14px;
+        border: 1px solid #e0e0e0;
+        border-radius: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+    }
 
-    /* 右侧：商品信息 */
+    .icon-arrow {
+        width: 16px;
+        height: 16px;
+        fill: #777;
+        transition: fill 0.3s ease;
+    }
+
+
+    .btn-back:hover {
+        background-color: #f5faff;
+        color: #007bff; 
+        border-color: #cce5ff;
+        box-shadow: 0 4px 8px rgba(0,123,255,0.1);
+        transform: translateY(-1px);
+    }
+
+    .btn-back:hover .icon-arrow {
+        fill: #007bff;
+    }
+
+    /* Item details */
     .info-section {
         flex: 1;
         display: flex;
@@ -54,7 +90,7 @@
         margin-bottom: 20px;
     }
 
-    /* 状态与位置标签 */
+    /* Status and position */
     .item-meta {
         margin-bottom: 20px;
         color: #555;
@@ -70,7 +106,7 @@
         color: #333;
     }
 
-    /* 商品描述 */
+    /* Decription */
     .item-description {
         margin-bottom: 30px;
         line-height: 1.6;
@@ -79,7 +115,7 @@
         padding-top: 20px;
     }
 
-    /* 卖家名片卡 (Basel 专门要求的) */
+    /* seller card */
     .seller-card {
         background: #fafafa;
         border: 1px solid #e0e0e0;
@@ -105,15 +141,15 @@
         font-size: 20px;
     }
 
-    /* 购物车按钮区 */
+    /*  */
     .action-buttons {
-        margin-top: auto; /* 把按钮推到最底部 */
+        margin-top: auto;
     }
     .btn-basket {
         width: 100%;
         padding: 16px;
         font-size: 18px;
-        background-color: #28a745; /* 绿色，代表安全的购买操作 */
+        background-color: #28a745;
         color: white;
         border: none;
         border-radius: 8px;
@@ -131,12 +167,26 @@
 {% endblock %}
 
 {% block content %}
-<div style="max-width: 1000px; margin: 20px auto 0;">
-    <a href="javascript:history.back()" style="color: #666; text-decoration: none; font-weight: bold;">← Back to Items</a>
+<div style="max-width: 1100px; margin: 25px auto 5px; display: flex; align-items: center; padding-left: 10px;">
+    
+    <a href="javascript:history.back()" class="btn-back">
+        <svg class="icon-arrow" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <path d="M669.6 849.6c8.8 8.8 23.2 8.8 32 0l48-48c8.8-8.8 8.8-23.2 0-32L416.8 512l332.8-257.6c8.8-8.8 8.8-23.2 0-32l-48-48c-8.8-8.8-23.2-8.8-32 0L300.8 496c-8.8 8.8-8.8 23.2 0 32l368.8 321.6z"></path>
+        </svg>
+        <span>Back to Items</span>
+    </a>
+
 </div>
 
 <div class="detail-container">
     
+    <div class="image-section">
+        {% if item.image %}
+            <img src="{{ item.image.url }}" alt="{{ item.title }}">
+        {% else %}
+            <img src="https://via.placeholder.com/600x600?text=No+Image" alt="No Image">
+        {% endif %}
+    </div>
     <div class="info-section">
         <h1 class="item-title">{{ item.title }}</h1>
         <p class="item-price">£{{ item.price }}</p>
@@ -166,7 +216,7 @@
             <form action="#" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="item_id" value="{{ item.id }}">
-                <button type="submit" class="btn-basket">Add to Basket 🛒</button>
+                <button type="submit" class="btn-basket">Add to Basket</button>
             </form>
         </div>
     </div>

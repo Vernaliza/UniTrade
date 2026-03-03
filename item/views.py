@@ -25,7 +25,7 @@ def item_create(request):
             obj.seller = request.user
             obj.status = Item.Status.ACTIVE  # or HIDDEN if you want moderation flow
             obj.save()
-            return redirect("item_detail", item_id=obj.id)
+            return redirect("item:item_detail", item_id=obj.id)
     else:
         form = ItemForm()
     return render(request, "item/item_form.html", {"form": form})
