@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - UniTrade{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+    <h2>Administrator Dashboard</h2>
+    <p>System Management and User Overview</p>
+
+    <hr>
+
+    <h3>Registered Members</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <thead>
+            <tr style="background-color: #007bff; color: white; text-align: left;">
+                <th style="padding: 12px; border: 1px solid #ddd;">Username</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">Email</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">Role</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">Date Joined</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 12px; border: 1px solid #ddd;">{{ u.username }}</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">{{ u.email }}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-transform: capitalize;">
+                    {% if u.profile %}
+                        {{ u.profile.role }}
+                    {% else %}
+                        Admin/No Profile
+                    {% endif %}
+                </td>
+                <td style="padding: 12px; border: 1px solid #ddd;">{{ u.date_joined|date:"M d, Y" }}</td>
+                
+                <td style="padding: 12px; border: 1px solid #ddd;">
+                    {% if u != request.user and not u.is_superuser %}
+                        <form action="{% url 'administrator:delete_user' u.id %}" method="POST" style="display:inline;" onsubmit="return confirm('WARNING: Are you sure you want to delete {{ u.username }}? All of their items will be permanently removed.');">
+                            {% csrf_token %}
+                            <button type="submit" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                Delete
+                            </button>
+                        </form>
+                    {% else %}
+                        <span style="color: gray; font-size: 0.9em;"><i>Protected</i></span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

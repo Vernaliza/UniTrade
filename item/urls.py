@@ -17,4 +17,10 @@ urlpatterns = [
     path("category/<slug:slug>/", views.item_category, name="item_category"),
     path("tag/<slug:tag_slug>/", views.item_tag, name="item_tag"),
     path("test/", views.item_test, name="item_test"),                         #←------------JUST FOR TEST!
+# ... your existing urls ...
+    # path("<int:item_id>/publish/", views.item_publish, name="item_publish"),
+    
+    # ADD THIS NEW LINE:
+    path("<int:item_id>/sold/", views.item_mark_sold, name="item_mark_sold"),
+
 ]

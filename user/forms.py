@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from .models import Profile
 # I put some functions that user app may use here
 
 class UserLoginForm(forms.Form):
@@ -28,6 +29,12 @@ class UserLoginForm(forms.Form):
 
 
 class UserRegisterForm(forms.ModelForm):
+    role = forms.ChoiceField(
+        choices=Profile.Role.choices,
+        label="I want to register as a:",
+        widget=forms.Select(attrs={'class': 'form-control'})
+
+    )
     password1 = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
@@ -87,4 +94,6 @@ class UserRegisterForm(forms.ModelForm):
         user.set_password(self.cleaned_data['password1'])
         if commit:
             user.save()
+            user.profile.role = self.cleaned_data.get('role')
+            user.profile.save()
         return user

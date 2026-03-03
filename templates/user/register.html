@@ -1,36 +1,60 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h2>Register</h2>
+{% block title %}Register - UniTrade{% endblock %}
 
-{% if messages %}
-    {% for message in messages %}
-        <p style="color:
-            {% if 'error' in message.tags %}
-                red
-            {% else %}
-                green
-            {% endif %};">
-            {{ message }}
-        </p>
-    {% endfor %}
-{% endif %}
+{% block extra_css %}
+<style>
+    .auth-container {
+        max-width: 400px;
+        margin: 60px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Register</button>
-</form>
+    .auth-title {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 25px;
+        color: #333;
+    }
 
-<p>
-    Already have an account?
-    <a href="{% url 'user:user_login' %}">Login</a>
-</p>
+    .auth-form p { margin-bottom: 15px; }
+    .auth-form label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+    .auth-form input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    .auth-form input:focus { border-color: #007bff; outline: none; }
 
-</body>
-</html>
+    .btn-submit {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        font-size: 16px;
+    }
+</style>
+{% endblock %}
 
+{% block content %}
+<div class="auth-container">
+    <h2 class="auth-title">Create an Account</h2>
+    
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <button type="submit" class="btn-publish btn-submit">Register</button>
+    </form>
+
+    <p style="text-align: center; margin-top: 25px; font-size: 14px; color: #666;">
+        Already have an account? 
+        <a href="{% url 'user:user_login' %}" style="color: #007bff; text-decoration: none; font-weight: bold;">Login here</a>
+    </p>
+</div>
+{% endblock %}

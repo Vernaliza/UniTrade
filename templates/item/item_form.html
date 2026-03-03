@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Add/Edit Item - UniTrade{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; background: #fff; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>List a New Item</h2>
+    
+    <form method="post" enctype="multipart/form-data" style="margin-top: 20px;">
+        {% csrf_token %}
+        
+        {{ form.as_p }}
+        
+        <div style="margin-top: 20px; text-align: right;">
+            <a href="{% url 'item:my_item' %}" style="margin-right: 15px; color: #666; text-decoration: none;">Cancel</a>
+            <button type="submit" class="btn-publish" style="padding: 10px 20px; font-size: 16px;">Publish Item</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

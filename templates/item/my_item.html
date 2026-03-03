@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}My Shop - UniTrade{% endblock %}
+
+{% block content %}
+<!-- <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <h2>My Shop Dashboard</h2>
+    
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'item:item_create' %}" class="btn-publish" style="padding: 10px 15px; text-decoration: none;">+ Add New Item</a>
+    </div> -->
+
+    <!-- <hr> -->
+
+    <h3>My Active Listings</h3>
+    {% if items %}
+        <ul style="list-style-type: none; padding: 0;">
+            {% for item in items %}
+                <li style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+                    <strong>{{ item.title }}</strong> - £{{ item.price }}
+                    <span style="color: gray; margin-left: 10px;">(Status: {{ item.get_status_display }})</span>
+                    
+                    {% if item.status == 'active' %}
+                        <form action="{% url 'item:item_mark_sold' item.id %}" method="post" style="display:inline; float: right;">
+                            {% csrf_token %}
+                            <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+                                Mark as Sold
+                            </button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't listed any items for sale yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

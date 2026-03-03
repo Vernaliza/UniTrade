@@ -1,35 +1,72 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>UniTrade Homepage Demo</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h2>UniTrade Homepage Demo</h2>
-<h2>This is a temporary homepage for testing user functions</h2>
+{% block title %}Home - UniTrade{% endblock %}
 
-{% if messages %}
-    {% for message in messages %}
-        <p style="color:
-            {% if 'error' in message.tags %}
-                red
-            {% else %}
-                green
-            {% endif %};">
-            {{ message }}
-        </p>
-    {% endfor %}
-{% endif %}
+{% block extra_css %}
+<style>
+    .dashboard-container { display: flex; gap: 30px; margin-top: 10px; }
+    
+    /* sidebar */
+    .sidebar { width: 220px; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; height: fit-content; }
+    .sidebar h3 { margin-top: 0; font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 10px; color: #333; }
+    
+    .category-link { display: block; padding: 10px 0; color: #555; text-decoration: none; border-bottom: 1px solid #eee; }
+    .category-link:hover { color: #007bff; font-weight: bold; }
 
-    <div>
-    {% if user.is_authenticated %}
-        <p>Welcome {{ user.username }}</p>
-        <a href="{% url 'user:user_logout' %}">Logout</a>
-    {% else %}
-        <a href="{% url 'user:user_login' %}">Login</a>
-        <a href="{% url 'user:user_register' %}">Register</a>
-        <a href="{% url 'item:item_test' %}">Item Test</a>
-    {% endif %}
+    /* items */
+    .item-grid { flex-grow: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+    
+    /* item card */
+    .item-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; text-decoration: none; color: inherit; transition: box-shadow 0.2s; }
+    .item-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    
+    .item-img-placeholder { height: 180px; background: #eaeaea; display: flex; align-items: center; justify-content: center; color: #888; font-size: 14px; }
+    
+    .item-info { padding: 15px; }
+    .item-title { margin: 0 0 10px 0; font-size: 16px; font-weight: bold; }
+    .item-price { margin: 0 0 5px 0; font-size: 18px; color: #d9534f; font-weight: bold; }
+    .item-location { margin: 0; font-size: 13px; color: #666; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <aside class="sidebar">
+        <h3>Categories</h3>
+        <a href="#" class="category-link">All Items</a>
+        <a href="#" class="category-link">Textbooks</a>
+        <a href="#" class="category-link">Electronics</a>
+        <a href="#" class="category-link">Clothing</a>
+    </aside>
+
+    <div class="item-grid">
+        <a href="#" class="item-card">
+            <div class="item-img-placeholder">Product Image</div>
+            <div class="item-info">
+                <h4 class="item-title">Xbox controller</h4>
+                <p class="item-price">£29.99</p>
+                <p class="item-location">📍 JMS, G12 8QQ</p>
+            </div>
+        </a>
+
+        <a href="#" class="item-card">
+            <div class="item-img-placeholder">Product Image</div>
+            <div class="item-info">
+                <h4 class="item-title">Macbook air M3</h4>
+                <p class="item-price">£599.00</p>
+                <p class="item-location">📍 G11 6EY</p>
+            </div>
+        </a>
+
+        <a href="#" class="item-card">
+            <div class="item-img-placeholder">Product Image</div>
+            <div class="item-info">
+                <h4 class="item-title">ASUS RTX 4070Ti</h4>
+                <p class="item-price">£300.00</p>
+                <p class="item-location">📍 G12 8QQ</p>
+            </div>
+        </a>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

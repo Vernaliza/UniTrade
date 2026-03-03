@@ -1,48 +1,43 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Item Test</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h1>Item Test Page</h1>
+{% block title %}Item Test - UniTrade{% endblock %}
 
-<hr>
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    
+    <h1 style="color: #333; margin-top: 0;">Item Test Page</h1>
 
-<h2>Some Test Links</h2>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
-<ul>
-    <li><a href="{% url 'item:item_list' %}">View Active Items</a></li>
-    <li><a href="{% url 'item:item_create' %}">Create Item</a></li>
-    <li><a href="{% url 'item:item_search' %}?q=test">Search</a></li>
-    <li><a href="{% url 'item:my_item' %}">My Items</a></li>
-</ul>
-
-<hr>
-
-<h2>Categories</h2>
-
-{% if categories %}
+    <h2>Some Test Links</h2>
     <ul>
-        {% for category in categories %}
-            <li>
-                <a href="{% url 'item_category' category.slug %}">
-                    {{ category.name }}
-                </a>
-            </li>
-        {% endfor %}
+        <li><a href="{% url 'item:item_list' %}" style="color: #007bff; text-decoration: none; font-weight: bold;">View Active Items</a></li>
     </ul>
-{% else %}
-    <p>No categories found.</p>
-{% endif %}
 
-<hr>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
-<h2>Debug Info</h2>
+    <h2>Categories</h2>
+    {% if categories %}
+        <ul style="list-style-type: square;">
+            {% for category in categories %}
+                <li style="margin-bottom: 5px;">
+                    <a href="{% url 'item:item_category' category.slug %}" style="color: #333; text-decoration: none;">
+                        {{ category.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p style="color: #666;">No categories found.</p>
+    {% endif %}
 
-<p>Authenticated: {{ request.user.is_authenticated }}</p>
-<p>User: {{ request.user }}</p>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
-</body>
-</html>
+    <h2>Debug Info</h2>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace;">
+        <p style="margin: 0 0 10px 0;"><strong>Authenticated:</strong> {{ request.user.is_authenticated }}</p>
+        <p style="margin: 0;"><strong>User:</strong> {{ request.user }}</p>
+    </div>
+
+</div>
+{% endblock %}

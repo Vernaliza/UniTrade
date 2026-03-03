@@ -1,25 +1,40 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Item List For Test</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h1>Item List For Test</h1>
+{% block title %}Browse Items - UniTrade{% endblock %}
 
-<p><a href="{% url 'item:item_test' %}">Back to Item Test</a></p>
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+    <h2 style="color: #333; margin-top: 0;">Marketplace Listings</h2>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
-{% if items %}
-    <ul>
-        {% for it in items %}
-            <li>
-                {{ it.title }} - {{ it.price }} - {{ it.status }}
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No items found.</p>
-{% endif %}
-
-</body>
-</html>
+    {% if items %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+            {% for item in items %}
+                <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    
+                    <div style="height: 180px; background-color: #f8f9fa; border-radius: 4px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: #888; border: 1px dashed #ccc;">
+                        {% if item.image %}
+                            <span style="color: #28a745; font-weight: bold;">[Image Attached]</span>
+                        {% else %}
+                            <span>No Image</span>
+                        {% endif %}
+                    </div>
+                    
+                    <h3 style="margin: 0 0 10px 0; font-size: 1.2em; color: #333;">{{ item.title }}</h3>
+                    <p style="margin: 0 0 10px 0; color: #28a745; font-weight: bold; font-size: 1.2em;">£{{ item.price }}</p>
+                    <p style="margin: 0 0 15px 0; color: #666; font-size: 0.9em;">Category: {{ item.category.name }}</p>
+                    
+                    <a href="{% url 'item:item_detail' item.id %}" style="display: block; text-align: center; background: #007bff; color: white; padding: 10px; border-radius: 4px; text-decoration: none; font-weight: bold;">
+                        View Details
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 50px; background: #fff; border-radius: 8px; border: 1px solid #ddd;">
+            <p style="color: #666; font-size: 1.2em; margin: 0;">No items are currently listed for sale.</p>
+            <p style="color: #999; margin-top: 10px;">Merchants will be adding products soon!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

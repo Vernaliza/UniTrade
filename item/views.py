@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
@@ -92,6 +93,17 @@ def item_search(request):
 def my_item(request):
     qs = Item.objects.filter(seller=request.user).order_by("-created_at")
     return render(request, "item/my_item.html", {"items": qs})
+
+
+@login_required
+def item_mark_sold(request, item_id):
+    obj = get_object_or_404(Item, pk=item_id, seller=request.user)
+    if request.method == "POST":
+        obj.status = Item.Status.SOLD
+        obj.save(update_fields=["status", "updated_at"])
+        messages.success(request, f'"{obj.title}" has been successfully marked as Sold!')
+    return redirect("item:my_item")
+
 
 """JUST FOR TEST!!!"""
 def item_test(request):
