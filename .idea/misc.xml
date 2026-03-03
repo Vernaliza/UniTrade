@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="unitrade_env" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="unitrade_env" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="uni" project-jdk-type="Python SDK" />
 </project>
