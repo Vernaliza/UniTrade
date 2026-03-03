@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Item Details - UniTrade{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 页面主容器 */
+    .detail-container {
+        max-width: 1000px;
+        margin: 20px auto 60px;
+        background: #ffffff;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        display: flex;
+        gap: 40px;
+        padding: 40px;
+    }
+
+    /* 左侧：商品大图 */
+    .image-section {
+        flex: 1;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 1px solid #eee;
+    }
+    .image-section img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    /* 右侧：商品信息 */
+    .info-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .item-title {
+        font-size: 28px;
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    .item-price {
+        font-size: 32px;
+        color: #d9534f;
+        font-weight: bold;
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
+
+    /* 状态与位置标签 */
+    .item-meta {
+        margin-bottom: 20px;
+        color: #555;
+    }
+    .item-meta span {
+        display: inline-block;
+        background: #f0f0f0;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-right: 10px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* 商品描述 */
+    .item-description {
+        margin-bottom: 30px;
+        line-height: 1.6;
+        color: #444;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+    }
+
+    /* 卖家名片卡 (Basel 专门要求的) */
+    .seller-card {
+        background: #fafafa;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    .seller-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .seller-avatar {
+        width: 48px;
+        height: 48px;
+        background: #007bff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #fff;
+        font-size: 20px;
+    }
+
+    /* 购物车按钮区 */
+    .action-buttons {
+        margin-top: auto; /* 把按钮推到最底部 */
+    }
+    .btn-basket {
+        width: 100%;
+        padding: 16px;
+        font-size: 18px;
+        background-color: #28a745; /* 绿色，代表安全的购买操作 */
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.2s, transform 0.1s;
+    }
+    .btn-basket:hover {
+        background-color: #218838;
+    }
+    .btn-basket:active {
+        transform: scale(0.98);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 20px auto 0;">
+    <a href="javascript:history.back()" style="color: #666; text-decoration: none; font-weight: bold;">← Back to Items</a>
+</div>
+
+<div class="detail-container">
+    
+    <div class="info-section">
+        <h1 class="item-title">{{ item.title }}</h1>
+        <p class="item-price">£{{ item.price }}</p>
+
+        <div class="item-meta">
+            <span>Condition: {{ item.get_condition_display }}</span>
+            <span>{{ item.position }}</span>
+        </div>
+
+        <div class="seller-card">
+            <h4 style="margin-top: 0; margin-bottom: 15px; color: #333;">Seller Information</h4>
+            <div class="seller-info">
+                <div class="seller-avatar">{{ item.seller.username|first|upper }}</div>
+                <div>
+                    <div style="font-weight: bold; font-size: 16px;">{{ item.seller.username }}</div>
+                    <div style="font-size: 14px; color: #666; margin-top: 4px;">Contact: {{ item.contact }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="item-description">
+            <h4 style="margin-top: 0; margin-bottom: 10px;">Description</h4>
+            <p>{{ item.description }}</p>
+        </div>
+
+        <div class="action-buttons">
+            <form action="#" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <button type="submit" class="btn-basket">Add to Basket 🛒</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
