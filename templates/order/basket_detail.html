@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}My Basket - UniTrade{% endblock %}
+
+{% block content %}
+<style>
+    .basket-container { max-width: 900px; margin: 40px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .basket-card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 30px; }
+    .basket-item { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; padding: 20px 0; }
+    .basket-item:last-child { border-bottom: none; }
+    
+    .item-info { flex: 2; }
+    .item-info h3 { margin: 0 0 8px 0; color: #333; font-size: 20px; }
+    .item-price { color: #888; font-size: 14px; }
+    
+    .item-actions { display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-end; }
+    .qty-input { width: 60px; padding: 8px; text-align: center; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+    .btn-update { background: #f8f9fa; border: 1px solid #ddd; color: #555; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-update:hover { background: #e2e6ea; }
+    
+    .btn-remove { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-remove:hover { background: #ffccc7; }
+    
+    .basket-summary { text-align: right; padding-top: 30px; margin-top: 10px; border-top: 2px solid #f0f0f0; }
+    .basket-summary h2 { margin: 0 0 20px 0; color: #d9534f; font-size: 28px; }
+    .btn-checkout { background: #28a745; color: white; border: none; padding: 15px 40px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(40,167,69,0.3); transition: 0.2s; }
+    .btn-checkout:hover { background: #218838; transform: translateY(-2px); }
+    
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-state h3 { color: #666; margin-bottom: 20px; }
+    .btn-shopping { background: #007bff; color: white; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; }
+    
+    /* Back btn style*/
+    .btn-back {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 18px;
+        background-color: #fdfdfd;
+        color: #555;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 14px;
+        border: 1px solid #e0e0e0;
+        border-radius: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+    }
+    .icon-arrow {
+        width: 16px;
+        height: 16px;
+        fill: #777;
+        transition: fill 0.3s ease;
+    }
+    .btn-back:hover {
+        background-color: #f5faff;
+        color: #007bff; 
+        border-color: #cce5ff;
+        box-shadow: 0 4px 8px rgba(0,123,255,0.1);
+        transform: translateY(-1px);
+    }
+    .btn-back:hover .icon-arrow {
+        fill: #007bff;
+    }
+
+</style>
+
+<div class="basket-container">
+    <div style="margin-bottom: 25px; display: flex; align-items: center;">
+        <a href="{% url 'item:item_list' %}" class="btn-back">
+            <svg class="icon-arrow" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                <path d="M669.6 849.6c8.8 8.8 23.2 8.8 32 0l48-48c8.8-8.8 8.8-23.2 0-32L416.8 512l332.8-257.6c8.8-8.8 8.8-23.2 0-32l-48-48c-8.8-8.8-23.2-8.8-32 0L300.8 496c-8.8 8.8-8.8 23.2 0 32l368.8 321.6z"></path>
+            </svg>
+            <span>Continue Shopping</span>
+        </a>
+    </div>
+
+    <h2 style="margin-bottom: 20px; color: #333;">🛒 My Basket</h2>
+
+    <div class="basket-card">
+        {% if items %}
+            {% for bi in items %}
+            <div class="basket-item">
+                <div class="item-info">
+                    <h3>{{ bi.item.title }}</h3>
+                    <div class="item-price">Unit Price: £{{ bi.unit_price }}</div>
+                </div>
+                
+                <div class="item-actions">
+                    <form method="post" action="{% url 'order:basket_update_quantity' %}" class="ajax-action-form" style="display: flex; gap: 10px; align-items: center; margin: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="basket_item_id" value="{{ bi.id }}">
+                        
+                        <input type="number" name="quantity" value="{{ bi.quantity }}" min="1" max="{{ bi.item.stock }}" class="qty-input" 
+                            oninvalid="this.setCustomValidity('Only {{ bi.item.stock }} item\(s\) left')" 
+                            oninput="this.setCustomValidity('')">
+
+                        <button type="submit" class="btn-update">Update</button>
+                        
+                        <span style="font-size: 12px; color: #999; margin-right: 10px; white-space: nowrap;">(Stock: {{ bi.item.stock }})</span>
+                    </form>
+
+                    <div style="font-weight: bold; width: 100px; text-align: right; font-size: 18px;">£{{ bi.subtotal }}</div>
+
+                    <form method="post" action="{% url 'order:basket_remove' %}" class="ajax-action-form" style="margin: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="basket_item_id" value="{{ bi.id }}">
+                        <button type="submit" class="btn-remove">Remove</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="basket-summary">
+                <h2>Total: £{{ total }}</h2>
+                <form method="post" action="{% url 'order:basket_checkout' %}" id="checkout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-checkout">Checkout & Confirm Order</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div style="font-size: 48px; margin-bottom: 20px;">📦</div>
+                <h3>Your basket is currently empty.</h3>
+                <a href="{% url 'item:item_list' %}" class="btn-shopping">Go find some deals!</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // 1. 处理 Update 和 Remove 的无刷新体验
+    document.querySelectorAll('.ajax-action-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // 阻止浏览器跳走去吃那个 JSON
+            
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "..."; // 按钮变成处理中状态
+            btn.disabled = true;
+
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // 操作成功后，直接原地刷新页面，以更新价格和列表
+                    window.location.reload(); 
+                } else {
+                    alert("Error: " + data.message);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error("AJAX Error:", err);
+                window.location.reload(); // 兜底策略：如果出错直接刷新
+            });
+        });
+    });
+
+    // 2. 处理 Checkout 结算按钮
+    const checkoutForm = document.getElementById('checkout-form');
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = this.querySelector('.btn-checkout');
+            btn.innerHTML = "Processing Order... ⏳";
+            btn.disabled = true;
+
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 结算成功后，带用户跳转到真实的 Order List 页面！
+                window.location.href = "{% url 'order:order_list' %}";
+            })
+            .catch(err => {
+                alert("Checkout failed. Please try again.");
+                btn.innerHTML = "Checkout & Confirm Order";
+                btn.disabled = false;
+            });
+        });
+    }
+</script>
+{% endblock %}

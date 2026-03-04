@@ -33,6 +33,7 @@
         height: auto;
         object-fit: cover;
     }
+    
     /* Back btn style*/
     .btn-back {
         display: flex;
@@ -49,15 +50,12 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         transition: all 0.3s ease;
     }
-
     .icon-arrow {
         width: 16px;
         height: 16px;
         fill: #777;
         transition: fill 0.3s ease;
     }
-
-
     .btn-back:hover {
         background-color: #f5faff;
         color: #007bff; 
@@ -65,7 +63,6 @@
         box-shadow: 0 4px 8px rgba(0,123,255,0.1);
         transform: translateY(-1px);
     }
-
     .btn-back:hover .icon-arrow {
         fill: #007bff;
     }
@@ -222,12 +219,51 @@
         </div>
 
         <div class="action-buttons">
-            <form action="#" method="POST">
+            <form id="add-to-basket-form">
                 {% csrf_token %}
                 <input type="hidden" name="item_id" value="{{ item.id }}">
-                <button type="submit" class="btn-basket">Add to Basket</button>
+                <input type="hidden" name="quantity" value="1"> 
+                
+                <button type="button" id="btn-submit-basket" class="btn-basket">Add to Basket</button>
             </form>
         </div>
+
+        <script>
+            document.getElementById('btn-submit-basket').addEventListener('click', function() {
+                const form = document.getElementById('add-to-basket-form');
+                const formData = new FormData(form);
+                
+                // 把按钮文字变成 loading 状态，体验更好
+                this.innerHTML = "Adding...";
+                this.disabled = true;
+
+                // 用 fetch 发送异步请求给后端
+                fetch("{% url 'order:basket_add' %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest' // 告诉后端这是个 AJAX 请求
+                    }
+                })
+                .then(response => response.json()) // 接收那串 JSON 数据
+                .then(data => {
+                    if (data.status === 'success') {
+                        // 成功了！我们无视他那个少斜杠的 url，强行跳到正确的购物车路由
+                        window.location.href = "/orderbasket/"; 
+                    } else {
+                        alert("Oops: " + data.message);
+                        this.innerHTML = "Add to Basket";
+                        this.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Something went wrong!");
+                    this.innerHTML = "Add to Basket";
+                    this.disabled = false;
+                });
+            });
+        </script>
     </div>
 </div>
 {% endblock %}
