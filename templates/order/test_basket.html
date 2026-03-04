@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Basket Page, Delete THis Page After Test!!!</title>
+
+    <style>
+
+        body{
+            font-family: Arial, sans-serif;
+            margin:40px;
+        }
+
+        h1{
+            color:#333;
+        }
+
+        ul{
+            padding-left:20px;
+        }
+
+        li{
+            margin-bottom:15px;
+        }
+
+        form{
+            display:inline-block;
+            margin-right:10px;
+        }
+
+        input{
+            padding:5px;
+        }
+
+        button{
+            padding:5px 10px;
+            cursor:pointer;
+        }
+
+        .box{
+            border:1px solid #ccc;
+            padding:15px;
+            margin-bottom:20px;
+            width:500px;
+        }
+
+        .nav{
+            margin-bottom:30px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<h1>Test Basket Page</h1>
+
+<div class="nav">
+    <a href="{% url 'order:order_list' %}">Order List</a> |
+    <a href="{% url 'order:test_order_page' %}">Order Test Page</a>
+</div>
+
+<hr>
+
+<div class="box">
+
+<h2>Add Item To Basket</h2>
+
+<form method="post" action="{% url 'order:basket_add' %}">
+    {% csrf_token %}
+
+    <label>Item ID:</label><br>
+    <input type="number" name="item_id" required><br>
+
+    <label>Quantity:</label><br>
+    <input type="number" name="quantity" value="1" min="1"><br>
+
+    <button type="submit">Add To Basket</button>
+
+</form>
+
+</div>
+
+<hr>
+
+<h2>Basket Items</h2>
+
+<p>Total Price: {{ total }}</p>
+
+<ul>
+
+{% for bi in items %}
+
+<li>
+
+<strong>{{ bi.item.title }}</strong><br>
+
+Unit Price: {{ bi.unit_price }} <br>
+Quantity: {{ bi.quantity }} <br>
+Subtotal: {{ bi.subtotal }} <br><br>
+
+<!-- Update Quantity -->
+<form method="post" action="{% url 'order:basket_update_quantity' %}">
+    {% csrf_token %}
+    <input type="hidden" name="basket_item_id" value="{{ bi.id }}">
+    <input type="number" name="quantity" value="{{ bi.quantity }}" min="0">
+    <button type="submit">Update</button>
+</form>
+
+<!-- Remove Item -->
+<form method="post" action="{% url 'order:basket_remove' %}">
+    {% csrf_token %}
+    <input type="hidden" name="basket_item_id" value="{{ bi.id }}">
+    <button type="submit">Remove</button>
+</form>
+
+</li>
+
+{% empty %}
+
+<li>Basket is empty</li>
+
+{% endfor %}
+
+</ul>
+
+<hr>
+
+<h2>Checkout</h2>
+
+<form method="post" action="{% url 'order:basket_checkout' %}">
+    {% csrf_token %}
+    <button type="submit">Checkout</button>
+</form>
+
+<p>
+After checkout the backend will return JSON with created order ids.
+</p>
+
+</body>
+</html>

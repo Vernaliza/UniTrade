@@ -1,42 +1,67 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.utils import timezone
-from django.urls import reverse
-from .models import Order
-from item.models import Item
-from django.db import transaction
 from django.db.models import Q
+from decimal import Decimal
+from django.db import transaction
+from django.http import JsonResponse
+from django.urls import reverse
+from item.models import Item
+from .models import Basket, BasketItem, Order
+import uuid
+
+'''The following are the order functions'''
 
 
 #create a new order here | 在这里创建订单
 @login_required
+@transaction.atomic
 def order_create(request):
     if request.method == 'POST':
-        product_id = request.POST.get('product_id')
+        #兼容 item_id / item_id | 兼容两种字段名
+        item_id = request.POST.get('item_id') or request.POST.get('item_id')
+        qty = int(request.POST.get('quantity', 1))
+
+        if qty <= 0:
+            return JsonResponse({'status': 'error', 'message': 'quantity must be > 0'})
+
         try:
-            product = Item.objects.get(id=product_id, status='active')
+            #only active item | 只允许购买上架商品
+            item = Item.objects.select_for_update().get(id=item_id, status=Item.Status.ACTIVE)
 
             #check if is yours order | 检查是不是你的订单
-            if product.seller == request.user:
+            if item.seller == request.user:
                 return JsonResponse({
                     'status': 'error',
                     'message': 'You cannot order yourself'
                 })
 
+            if item.seller is None:
+                return JsonResponse({'status': 'error', 'message': 'Item has no seller'})
+
+            #check stock | 检查库存
+            if item.stock < qty:
+                return JsonResponse({'status': 'error', 'message': f'Not enough stock. Left: {item.stock}'})
+
             #create | 创建订单
             order = Order.objects.create(
+                order_id=_new_order_id(),
                 customer=request.user,
-                seller=product.seller,
-                product=product,
-                price=product.price,
+                seller=item.seller,
+                item=item,
+                quantity=qty,
+                amount=(item.price * qty),
                 status='paid',
-                paid_at=timezone.now()
+                paid_time=timezone.now()
             )
 
-            #update status to 'sold' | 更新状态为已售出
-            product.status = 'sold'
-            product.save()
+            #update stock and status | 更新库存与状态
+            item.stock -= qty
+            if item.stock == 0:
+                item.status = Item.Status.SOLD
+                item.save(update_fields=["stock", "status"])
+            else:
+                item.save(update_fields=["stock"])
 
             return JsonResponse({
                 'status': 'success',
@@ -59,7 +84,6 @@ def order_create(request):
         'status': 'error',
         'message': 'Invalid request method'
     })
-
 
 #week8 we will learn AJAX, maybe anyone want additional AJAX interface :)
 def _is_ajax(request):
@@ -180,7 +204,7 @@ def order_delete(request, order_id):
 def order_list(request):
     orders = Order.objects.filter(
         Q(customer=request.user) | Q(seller=request.user)
-    ).select_related('customer', 'seller', 'product')
+    ).select_related('customer', 'seller', 'item')
 
     return render(request, 'order/order_list.html', {
         'orders': orders
@@ -247,4 +271,159 @@ def order_detail(request, order_id):
 
     return render(request, 'order/order_detail.html', {
         'order': order
+    })
+
+
+
+'''The following are the shopping cart functions'''
+
+
+
+#Ensure that the creation is completed on the first visit and the same basket is reused thereafter
+#保证第一次访问就完成创建，之后一直复用同一个 Basket
+def _get_or_create_basket(user) -> Basket:
+    basket, _ = Basket.objects.get_or_create(user=user)
+    return basket
+
+
+#view basket details here | 在这里查看购物车详情
+@login_required
+def basket_detail(request):
+    basket = _get_or_create_basket(request.user)
+    items = basket.items.select_related("item")
+    return render(request, "order/basket_detail.html", {
+        "basket": basket,
+        "items": items,
+        "total": basket.total_amount(),
+    })
+
+
+#add to the basket | 加入购物车
+@login_required
+@transaction.atomic
+def basket_add(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    item_id = request.POST.get("item_id")
+    qty = int(request.POST.get("quantity", 1))
+
+    if qty <= 0:
+        return JsonResponse({"status": "error", "message": "quantity must be > 0"}, status=400)
+
+    item = get_object_or_404(Item, id=item_id)
+
+    #verify | 校验
+    if hasattr(item, "status") and item.status != "active":
+        return JsonResponse({"status": "error", "message": "Item is not available"}, status=400)
+    if hasattr(item, "seller") and item.seller == request.user:
+        return JsonResponse({"status": "error", "message": "You cannot add your own item"}, status=400)
+
+    basket = _get_or_create_basket(request.user)
+
+    bi, created = BasketItem.objects.select_for_update().get_or_create(
+        basket=basket,
+        item=item,
+        defaults={"quantity": qty, "unit_price": getattr(item, "price", Decimal("0.00"))},
+    )
+    if not created:
+        bi.quantity += qty
+        bi.unit_price = getattr(item, "price", bi.unit_price)
+        bi.save()
+
+    return JsonResponse({
+        "status": "success",
+        "message": "Added to basket",
+        "redirect_url": reverse("order:basket_detail"),
+    })
+
+
+#modify quantity | 修改数量
+@login_required
+@transaction.atomic
+def basket_update_quantity(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    basket = _get_or_create_basket(request.user)
+    bi_id = request.POST.get("basket_item_id")
+    qty = int(request.POST.get("quantity", 1))
+
+    bi = get_object_or_404(BasketItem.objects.select_for_update(), id=bi_id, basket=basket)
+
+    if qty <= 0:
+        bi.delete()
+    else:
+        bi.quantity = qty
+        bi.save()
+
+    return JsonResponse({"status": "success", "redirect_url": reverse("order:basket_detail")})
+
+
+#remove item | 移除商品
+@login_required
+@transaction.atomic
+def basket_remove(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    basket = _get_or_create_basket(request.user)
+    bi_id = request.POST.get("basket_item_id")
+
+    bi = get_object_or_404(BasketItem.objects.select_for_update(), id=bi_id, basket=basket)
+    bi.delete()
+
+    return JsonResponse({"status": "success", "redirect_url": reverse("order:basket_detail")})
+
+def _new_order_id():
+    return uuid.uuid4().hex[:20].upper()
+
+#checkout, turn the status of order to "pending", turn the status of item to "sold" | 结算
+@login_required
+@transaction.atomic
+def basket_checkout(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    basket = _get_or_create_basket(request.user)
+
+    basket_items = list(basket.items.select_for_update().select_related("item"))
+    if not basket_items:
+        return JsonResponse({"status": "error", "message": "Basket is empty"}, status=400)
+
+    created_orders = []
+
+    for bi in basket_items:
+        item = Item.objects.select_for_update().get(id=bi.item_id)
+
+        if item.status != Item.Status.ACTIVE:
+            return JsonResponse({"status": "error", "message": f"Item {item.id} is not available"}, status=400)
+
+        if item.seller_id == request.user.id:
+            return JsonResponse({"status": "error", "message": "You cannot checkout your own item"}, status=400)
+
+        if item.seller is None:
+            return JsonResponse({"status": "error", "message": "Item has no seller"}, status=400)
+
+        order = Order.objects.create(
+            order_id=_new_order_id(),
+            customer=request.user,
+            seller=item.seller,
+            item=item,
+            amount=bi.unit_price,
+            status="pending",
+        )
+        created_orders.append(order.order_id)
+
+        item.status = Item.Status.SOLD
+        item.save(update_fields=["status"])
+
+    #clear basket | 清空购物车
+    basket.items.all().delete()
+
+    return JsonResponse({
+        "status": "success",
+        "message": "Checkout success",
+        "redirect_url": reverse("order:order_list"),
+        "orders": created_orders,
     })

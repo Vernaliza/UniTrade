@@ -32,9 +32,12 @@ class Item(models.Model):
         HIDDEN = "hidden", "Hidden"
         DELETED = "deleted", "Deleted"
 
+
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)], )
+    stock = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)], )
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="items", )
     seller = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="items", )
     image = models.ImageField(upload_to=item_image_path, blank=True, null=True)
