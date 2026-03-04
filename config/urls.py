@@ -19,17 +19,19 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import include
 from django.shortcuts import render
+from django.views.generic import RedirectView
 
 def index(request):
     return render(request, "index.html")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('', index, name='index'),
+    # path('', index, name='index'),
+    path('', RedirectView.as_view(pattern_name='item:item_list', permanent=False), name='index'),
     path('administrator/', include('administrator.urls')),
     # path('item/', include('item.urls')),
     # path('message/', include('message.urls')),
-    # path('order', include('order.urls')),
+    path('order', include('order.urls')),
     # path('review/', include('review.urls')),
     path('user/', include('user.urls')),
     path("item/", include("item.urls")),

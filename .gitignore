@@ -5,3 +5,7 @@ db.sqlite3
 .env
 .vscode/
 *.log
+
+# Ignore media files (user-uploaded content)
+media/
+items/
