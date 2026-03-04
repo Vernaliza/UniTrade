@@ -3,38 +3,110 @@
 {% block title %}Browse Items - UniTrade{% endblock %}
 
 {% block content %}
-<div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
-    <h2 style="color: #333; margin-top: 0;">Marketplace Listings</h2>
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+<style>
+    /* 页面整体左右布局 */
+    .page-container { display: flex; max-width: 1200px; margin: 40px auto; gap: 30px; padding: 0 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    /* 左侧分类栏 */
+    .sidebar { width: 250px; flex-shrink: 0; }
+    .sidebar-card { background: white; border: 1px solid #eee; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .sidebar-title { margin-top: 0; margin-bottom: 20px; color: #333; font-size: 18px; border-bottom: 2px solid #f8f9fa; padding-bottom: 10px; font-weight: bold; }
+    .category-list { list-style: none; padding: 0; margin: 0; }
+    .category-list li { margin-bottom: 8px; }
+    .category-list a { text-decoration: none; color: #555; display: block; padding: 10px 12px; border-radius: 6px; transition: 0.2s ease; }
+    .category-list a:hover { background: #f0f7ff; color: #007bff; font-weight: 500; }
 
-    {% if items %}
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
-            {% for item in items %}
-                <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                    
-                    <div style="height: 180px; background-color: #f8f9fa; border-radius: 4px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: #888; border: 1px dashed #ccc;">
-                        {% if item.image %}
-                            <span style="color: #28a745; font-weight: bold;">[Image Attached]</span>
-                        {% else %}
-                            <span>No Image</span>
-                        {% endif %}
-                    </div>
-                    
-                    <h3 style="margin: 0 0 10px 0; font-size: 1.2em; color: #333;">{{ item.title }}</h3>
-                    <p style="margin: 0 0 10px 0; color: #28a745; font-weight: bold; font-size: 1.2em;">£{{ item.price }}</p>
-                    <p style="margin: 0 0 15px 0; color: #666; font-size: 0.9em;">Category: {{ item.category.name }}</p>
-                    
-                    <a href="{% url 'item:item_detail' item.id %}" style="display: block; text-align: center; background: #007bff; color: white; padding: 10px; border-radius: 4px; text-decoration: none; font-weight: bold;">
-                        View Details
+    /* 右侧商品网格 */
+    .main-content { flex-grow: 1; }
+    .page-header { margin-top: 0; margin-bottom: 20px; color: #333; font-size: 24px; }
+    .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+    
+    /* 💥 商品卡片（包含核心悬浮动画） */
+    .item-card { 
+        display: block; text-decoration: none; color: inherit;
+        background: white; border: 1px solid #eee; border-radius: 12px; 
+        overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        transition: transform 0.3s ease, box-shadow 0.3s ease; 
+    }
+    .item-card:hover { 
+        transform: translateY(-6px); /* 向上浮动 */
+        box-shadow: 0 12px 24px rgba(0,0,0,0.12); /* 阴影加深扩散 */
+    }
+    
+    /* 图片容器与动画 */
+    .item-img-container { height: 180px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden; border-bottom: 1px solid #f5f5f5; }
+    .item-img-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+    .item-card:hover .item-img-container img { transform: scale(1.05); } /* 悬浮时图片轻微放大，非常有质感 */
+    
+    /* 卡片文字信息 */
+    .item-info { padding: 16px; }
+    .item-title { margin: 0 0 8px 0; font-size: 16px; color: #333; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-price { margin: 0 0 8px 0; color: #d9534f; font-weight: bold; font-size: 18px; }
+    .item-category { margin: 0 0 5px 0; color: #888; font-size: 12px; }
+
+    /* 默认的分类链接样式 */
+    .cat-item-link { color: #555; }
+    /* 选中时的分类链接样式 */
+    .cat-item-link.active { color: #007bff; font-weight: bold; }
+</style>
+
+<div class="page-container">
+    
+    <aside class="sidebar">
+        <div class="sidebar-card">
+            <h3 class="sidebar-title">Categories</h3>
+            <ul class="category-list">
+                <li>
+                    <a href="{% url 'item:item_list' %}" 
+                    class="cat-item-link {% if not category %}active{% endif %}">
+                    All Items
                     </a>
-                </div>
-            {% endfor %}
+                </li>
+                
+                {% for cat in categories %}
+                <li>
+                    <a href="{% url 'item:item_category' cat.slug %}" 
+                    class="cat-item-link {% if category and category.slug == cat.slug %}active{% endif %}">
+                        {{ cat.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
-    {% else %}
-        <div style="text-align: center; padding: 50px; background: #fff; border-radius: 8px; border: 1px solid #ddd;">
-            <p style="color: #666; font-size: 1.2em; margin: 0;">No items are currently listed for sale.</p>
-            <p style="color: #999; margin-top: 10px;">Merchants will be adding products soon!</p>
-        </div>
-    {% endif %}
+    </aside>
+
+    <main class="main-content">
+        
+        {% if items %}
+            <div class="item-grid">
+                {% for item in items %}
+                    <a href="{% url 'item:item_detail' item.id %}" class="item-card">
+                        
+                        <div class="item-img-container">
+                            {% if item.image %}
+                                <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                            {% else %}
+                                <span style="color: #bbb; font-size: 14px;">No Image</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="item-info">
+                            <h3 class="item-title">{{ item.title }}</h3>
+                            <p class="item-price">£{{ item.price }}</p>
+                            <p class="item-category">🏷️ {{ item.category.name|default:"General" }}</p>
+                            <p class="item-category" style="margin:0;">📍 {{ item.position|default:"Campus" }}</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 12px; border: 1px dashed #ccc;">
+                <div style="font-size: 48px; margin-bottom: 20px;">🛍️</div>
+                <h3 style="color: #666; margin: 0 0 10px 0;">No items are currently listed for sale.</h3>
+                <p style="color: #999; margin: 0;">Merchants will be adding products soon!</p>
+            </div>
+        {% endif %}
+    </main>
+
 </div>
 {% endblock %}

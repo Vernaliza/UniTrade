@@ -41,32 +41,32 @@
     </aside>
 
     <div class="item-grid">
-        <a href="#" class="item-card">
-            <div class="item-img-placeholder">Product Image</div>
-            <div class="item-info">
-                <h4 class="item-title">Xbox controller</h4>
-                <p class="item-price">£29.99</p>
-                <p class="item-location">📍 JMS, G12 8QQ</p>
-            </div>
-        </a>
+        {% for item in items %}
+        <a href="{% url 'item:item_detail' item.id %}" class="item-card" style="text-decoration: none; color: inherit;">
+            
+            {% if item.image %}
+                <div style="height: 200px; overflow: hidden; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+            {% else %}
+                <div class="item-img-placeholder" style="height: 200px; display: flex; align-items: center; justify-content: center; background: #eee; color: #999;">
+                    No Image
+                </div>
+            {% endif %}
 
-        <a href="#" class="item-card">
-            <div class="item-img-placeholder">Product Image</div>
             <div class="item-info">
-                <h4 class="item-title">Macbook air M3</h4>
-                <p class="item-price">£599.00</p>
-                <p class="item-location">📍 G11 6EY</p>
+                <h4 class="item-title">{{ item.title }}</h4>
+                <p class="item-price">£{{ item.price }}</p> 
+                <p class="item-location">📍 {{ item.position|default:"Campus" }}</p>
             </div>
         </a>
-
-        <a href="#" class="item-card">
-            <div class="item-img-placeholder">Product Image</div>
-            <div class="item-info">
-                <h4 class="item-title">ASUS RTX 4070Ti</h4>
-                <p class="item-price">£300.00</p>
-                <p class="item-location">📍 G12 8QQ</p>
-            </div>
-        </a>
+        
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #888;">
+            <p style="font-size: 48px; margin-bottom: 10px;">🛒</p>
+            <p>No items found in the marketplace right now.</p>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

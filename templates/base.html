@@ -63,8 +63,9 @@
                         <a href="{% url 'item:item_create' %}" class="btn-publish">+ Add New Item</a>
                         <a href="{% url 'item:my_item' %}">My Shop</a>
                     {% else %}
-                        <a href="{% url 'item:item_list' %}">Browse Items</a>
-                        <a href="#">My Purchases(WIP)</a>
+                        <a href="{% url 'item:item_list' %}" style="margin-right: 15px; text-decoration: none; color: #333; font-weight: bold;">Browse Items</a>
+                        <a href="/orderbasket/" style="margin-right: 15px; text-decoration: none; color: #333; font-weight: bold;">Basket</a>
+                        <a href="/order" style="text-decoration: none; color: #333; font-weight: bold;">My Orders</a>
                     {% endif %}
                     
                     <a href="{% url 'user:user_logout' %}">Logout</a>

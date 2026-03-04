@@ -33,7 +33,7 @@
         height: auto;
         object-fit: cover;
     }
-    
+
     /* Back btn style*/
     .btn-back {
         display: flex;
@@ -202,7 +202,7 @@
                     
                     {% if has_ordered or user == item.seller %}
                         <div style="font-size: 14px; color: #28a745; margin-top: 4px; font-weight: bold;">
-                            ✅ Contact: {{ item.contact }}
+                            Contact: {{ item.seller.email|default:"No contact provided" }}
                         </div>
                     {% else %}
                         <div style="font-size: 13px; color: #999; margin-top: 4px; font-style: italic;">
@@ -223,8 +223,18 @@
                 {% csrf_token %}
                 <input type="hidden" name="item_id" value="{{ item.id }}">
                 <input type="hidden" name="quantity" value="1"> 
-                
-                <button type="button" id="btn-submit-basket" class="btn-basket">Add to Basket</button>
+                <!-- if stock = 0, user can't press btn -->
+                {% if item.stock > 0 %}
+                    <button type="button" id="btn-submit-basket" class="btn-basket" style="background-color: #4CAF50; color: white;">
+                        Add to Basket
+                    </button>
+                    <p style="font-size: 13px; color: #28a745; margin-top: 8px;">In Stock: {{ item.stock }}</p>
+                {% else %}
+                    <button type="button" class="btn-basket" disabled style="background-color: #cccccc; color: #666666; cursor: not-allowed; border: 1px solid #bbbbbb;">
+                        Out of Stock
+                    </button>
+                    <p style="font-size: 13px; color: #dc3545; margin-top: 8px;">Sorry, this item is sold out.</p>
+                {% endif %}
             </form>
         </div>
 

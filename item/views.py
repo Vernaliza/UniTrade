@@ -64,9 +64,10 @@ def item_delete(request, item_id):
 
 
 def item_category(request, slug):
+    categories = Category.objects.all()
     category = get_object_or_404(Category, slug=slug)
     qs = Item.objects.filter(category=category, status=Item.Status.ACTIVE).order_by("-created_at")
-    return render(request, "item/item_list.html", {"items": qs, "category": category})
+    return render(request, "item/item_list.html", {"items": qs, "category": category, "categories": categories})
 
 
 def item_tag(request, tag_slug):
@@ -76,8 +77,9 @@ def item_tag(request, tag_slug):
 
 
 def item_list(request):
+    categories = Category.objects.all()
     qs = Item.objects.filter(status=Item.Status.ACTIVE).order_by("-created_at")
-    return render(request, "item/item_list.html", {"items": qs})
+    return render(request, "item/item_list.html", {"items": qs, "categories": categories})
 
 
 def item_search(request):
