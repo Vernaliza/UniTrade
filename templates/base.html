@@ -15,9 +15,24 @@
         nav { display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 24px; font-weight: bold; color: #333; text-decoration: none; }
         
-        /* Search bar */
-        .search-bar { flex-grow: 1; margin: 0 40px; }
+      /* Search bar */
+        .search-bar { flex-grow: 1; margin: 0 40px; position: relative; } /* Added position: relative */
         .search-bar input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        
+        /* NEW: Live Search Dropdown Styles */
+        .search-dropdown {
+            position: absolute; top: 100%; left: 0; width: 100%; background: white;
+            border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000; display: none; max-height: 400px; overflow-y: auto; margin-top: 5px;
+        }
+        .search-dropdown-item {
+            display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #eee;
+            text-decoration: none; color: #333; transition: background 0.2s;
+        }
+        .search-dropdown-item:hover { background-color: #f8f9fa; }
+        .search-dropdown-img {
+            width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin-right: 15px; background: #eee;
+        }
         
         /* nav-link */
         .nav-links { display: flex; gap: 15px; align-items: center; }
@@ -45,10 +60,11 @@
         <nav>
             <a href="{% url 'item:item_list' %}" class="logo">UniTrade</a>
             
-            <div class="search-bar">
+<div class="search-bar">
                 <form action="{% url 'item:item_search' %}" method="GET">
-                    <input type="text" name="q" placeholder="Search items (e.g. Textbooks)..." aria-label="Search items">
+                    <input type="text" id="live-search-input" name="q" placeholder="Search items (e.g. Textbooks)..." aria-label="Search items" autocomplete="off">
                 </form>
+                <div id="search-results-dropdown" class="search-dropdown"></div>
             </div>
 
             <div class="nav-links">
@@ -98,5 +114,66 @@
     </footer>
 
     {% block extra_js %}{% endblock %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('live-search-input');
+            const dropdown = document.getElementById('search-results-dropdown');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.trim();
+
+                    if (query.length > 0) {
+                        // Fetch data from our backend secretly
+                        fetch(`{% url 'item:item_search' %}?q=${encodeURIComponent(query)}`, {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            dropdown.innerHTML = ''; // Clear old results
+                            
+                            if (data.status === 'success' && data.results.length > 0) {
+                                // Build a row for every item found
+                                data.results.forEach(item => {
+                                    const imgHtml = item.image_url 
+                                        ? `<img src="${item.image_url}" class="search-dropdown-img">` 
+                                        : `<div class="search-dropdown-img" style="display:flex;align-items:center;justify-content:center;font-size:10px;color:#999;">No Img</div>`;
+                                    
+                                    const itemHtml = `
+                                        <a href="/item/${item.id}/" class="search-dropdown-item">
+                                            ${imgHtml}
+                                            <div>
+                                                <div style="font-weight:bold;">${item.title}</div>
+                                                <div style="color:#d9534f;font-size:14px;font-weight:bold;">£${item.price}</div>
+                                            </div>
+                                        </a>
+                                    `;
+                                    dropdown.insertAdjacentHTML('beforeend', itemHtml);
+                                });
+                                dropdown.style.display = 'block';
+                            } else {
+                                // Nothing found
+                                dropdown.innerHTML = '<div style="padding:15px;color:#666;text-align:center;">No items match your search.</div>';
+                                dropdown.style.display = 'block';
+                            }
+                        });
+                    } else {
+                        // Hide if they delete their text
+                        dropdown.style.display = 'none';
+                    }
+                });
+
+                // Hide dropdown if user clicks anywhere else on the page
+                document.addEventListener('click', function(e) {
+                    if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
 </body>
 </html>

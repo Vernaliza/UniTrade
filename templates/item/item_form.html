@@ -160,11 +160,17 @@
                 <small style="color: #999;">Include key details like brand, model, and color.</small>
             </div>
 
-            <div style="display: flex; gap: 20px;">
+<div style="display: flex; gap: 20px;">
                 <div class="field-wrapper" style="flex: 1;">
                     <label>Price (£)</label>
                     {{ form.price }}
                 </div>
+                
+                <div class="field-wrapper" style="flex: 1;">
+                    <label>Quantity (Stock)</label>
+                    {{ form.stock }}
+                </div>
+                
                 <div class="field-wrapper" style="flex: 1;">
                     <label>Condition</label>
                     {{ form.condition }}

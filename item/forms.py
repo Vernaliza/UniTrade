@@ -7,7 +7,7 @@ from .models import Item
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
-        fields = ["title", "category", "price", "description", "image"]
+        fields = ["title", "category", "price", "stock","condition","description", "image"]
         widgets = {
             "title": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Enter item title", "autofocus": True}
@@ -16,10 +16,12 @@ class ItemForm(forms.ModelForm):
             "price": forms.NumberInput(
                 attrs={"class": "form-control", "placeholder": "Enter item price", "min": "0", "step": "0.01"}
             ),
+            "condition": forms.Select(attrs={"class": "form-control"}),
             "description": forms.Textarea(
                 attrs={"class": "form-control", "placeholder": "Describe condition, usage, and any defects", "rows": 5}
             ),
             "image": forms.ClearableFileInput(attrs={"class": "form-control", "accept": "image/*"}),
+            "stock": forms.NumberInput(attrs={"class": "form-control", "min": "1", "value": "1"}),
         }
 
     def clean_image(self):

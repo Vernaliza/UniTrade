@@ -57,8 +57,9 @@ def order_create(request):
 
             #update stock and status | 更新库存与状态
             item.stock -= qty
-            if item.stock == 0:
-                item.status = Item.Status.SOLD
+            if item.stock <= 0:
+                item.stock = 0
+                item.status = "pending"  # <--- MAKE SURE THIS SAYS "pending", not "sold"!
                 item.save(update_fields=["stock", "status"])
             else:
                 item.save(update_fields=["stock"])
@@ -410,13 +411,19 @@ def basket_checkout(request):
             customer=request.user,
             seller=item.seller,
             item=item,
-            amount=bi.unit_price,
+            quantity=bi.quantity,        
+            amount=bi.subtotal(),       
             status="pending",
         )
         created_orders.append(order.order_id)
 
-        item.status = Item.Status.SOLD
-        item.save(update_fields=["status"])
+        item.stock -= bi.quantity
+        if item.stock <= 0:
+            item.stock = 0
+            item.status = "pending"  # <--- MAKE SURE THIS SAYS "pending", not Item.Status.SOLD!
+            item.save(update_fields=["stock", "status"])
+        else:
+            item.save(update_fields=["stock"])
 
     #clear basket | 清空购物车
     basket.items.all().delete()

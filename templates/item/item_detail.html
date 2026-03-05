@@ -190,9 +190,7 @@
 
         <div class="item-meta">
             <span>Condition: {{ item.get_condition_display }}</span>
-            <span>{{ item.position }}</span>
         </div>
-
         <div class="seller-card">
             <h4 style="margin-top: 0; margin-bottom: 15px; color: #333;">Seller Information</h4>
             <div class="seller-info">
@@ -218,61 +216,76 @@
             <p>{{ item.description }}</p>
         </div>
 
-        <div class="action-buttons">
-            <form id="add-to-basket-form">
-                {% csrf_token %}
-                <input type="hidden" name="item_id" value="{{ item.id }}">
-                <input type="hidden" name="quantity" value="1"> 
-                <!-- if stock = 0, user can't press btn -->
-                {% if item.stock > 0 %}
-                    <button type="button" id="btn-submit-basket" class="btn-basket" style="background-color: #4CAF50; color: white;">
-                        Add to Basket
-                    </button>
-                    <p style="font-size: 13px; color: #28a745; margin-top: 8px;">In Stock: {{ item.stock }}</p>
-                {% else %}
-                    <button type="button" class="btn-basket" disabled style="background-color: #cccccc; color: #666666; cursor: not-allowed; border: 1px solid #bbbbbb;">
-                        Out of Stock
-                    </button>
-                    <p style="font-size: 13px; color: #dc3545; margin-top: 8px;">Sorry, this item is sold out.</p>
-                {% endif %}
-            </form>
+<div class="action-buttons">
+            {% if not user.is_authenticated %}
+                <div style="padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; color: #721c24; text-align: center; font-weight: bold;">
+                    Only registered students can buy items. <br>
+                    <a href="{% url 'user:user_login' %}?next={{ request.path }}" style="color: #721c24; text-decoration: underline; margin-top: 10px; display: inline-block;">Log in or Register here</a>
+                </div>
+                
+            {% elif user.is_staff or user.profile.role == 'merchant' %}
+                <div style="padding: 15px; background-color: #e2e3e5; border: 1px solid #d6d8db; border-radius: 8px; color: #383d41; text-align: center; font-weight: bold;">
+                    Merchants cannot purchase items.
+                </div>
+                
+            {% else %}
+                <form id="add-to-basket-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <input type="hidden" name="quantity" value="1"> 
+                    
+                    {% if item.stock > 0 %}
+                        <button type="button" id="btn-submit-basket" class="btn-basket" style="background-color: #4CAF50; color: white;">
+                            Add to Basket
+                        </button>
+                        <p style="font-size: 13px; color: #28a745; margin-top: 8px;">In Stock: {{ item.stock }}</p>
+                    {% else %}
+                        <button type="button" class="btn-basket" disabled style="background-color: #cccccc; color: #666666; cursor: not-allowed; border: 1px solid #bbbbbb;">
+                            Out of Stock
+                        </button>
+                        <p style="font-size: 13px; color: #dc3545; margin-top: 8px;">Sorry, this item is sold out.</p>
+                    {% endif %}
+                </form>
+            {% endif %}
         </div>
 
         <script>
-            document.getElementById('btn-submit-basket').addEventListener('click', function() {
-                const form = document.getElementById('add-to-basket-form');
-                const formData = new FormData(form);
-                
-                // 把按钮文字变成 loading 状态，体验更好
-                this.innerHTML = "Adding...";
-                this.disabled = true;
+            // We check if the button actually exists before adding the click event
+            // so the browser doesn't throw a Javascript error for logged-out users!
+            const btnSubmitBasket = document.getElementById('btn-submit-basket');
+            if (btnSubmitBasket) {
+                btnSubmitBasket.addEventListener('click', function() {
+                    const form = document.getElementById('add-to-basket-form');
+                    const formData = new FormData(form);
+                    
+                    this.innerHTML = "Adding...";
+                    this.disabled = true;
 
-                // 用 fetch 发送异步请求给后端
-                fetch("{% url 'order:basket_add' %}", {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest' // 告诉后端这是个 AJAX 请求
-                    }
-                })
-                .then(response => response.json()) // 接收那串 JSON 数据
-                .then(data => {
-                    if (data.status === 'success') {
-                        // 成功了！我们无视他那个少斜杠的 url，强行跳到正确的购物车路由
-                        window.location.href = "/orderbasket/"; 
-                    } else {
-                        alert("Oops: " + data.message);
+                    fetch("{% url 'order:basket_add' %}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest' 
+                        }
+                    })
+                    .then(response => response.json()) 
+                    .then(data => {
+                        if (data.status === 'success') {
+                            window.location.href = "/orderbasket/"; 
+                        } else {
+                            alert("Oops: " + data.message);
+                            this.innerHTML = "Add to Basket";
+                            this.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert("Something went wrong!");
                         this.innerHTML = "Add to Basket";
                         this.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert("Something went wrong!");
-                    this.innerHTML = "Add to Basket";
-                    this.disabled = false;
+                    });
                 });
-            });
+            }
         </script>
     </div>
 </div>

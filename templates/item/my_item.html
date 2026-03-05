@@ -13,22 +13,51 @@
     <!-- <hr> -->
 
     <h3>My Active Listings</h3>
-    {% if items %}
+{% if items %}
         <ul style="list-style-type: none; padding: 0;">
             {% for item in items %}
-                <li style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
-                    <strong>{{ item.title }}</strong> - £{{ item.price }}
-                    <span style="color: gray; margin-left: 10px;">(Status: {{ item.get_status_display }})</span>
+                
+                {% if item.status != 'sold' and item.status != 'deleted' %}
+                <li style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px; background-color: #fff;">
                     
-                    {% if item.status == 'active' %}
-                        <form action="{% url 'item:item_mark_sold' item.id %}" method="post" style="display:inline; float: right;">
-                            {% csrf_token %}
-                            <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
-                                Mark as Sold
-                            </button>
-                        </form>
+                    <strong>
+                        <a href="{% url 'item:item_detail' item.id %}" style="text-decoration: none; color: #007bff; font-size: 18px;">
+                            {{ item.title }}
+                        </a>
+                    </strong> 
+                    - £{{ item.price }}
+                    
+                    <span style="margin-left: 10px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; 
+                        {% if item.status == 'active' %}background-color: #d4edda; color: #155724;
+                        {% elif item.status == 'pending' %}background-color: #fff3cd; color: #856404;{% endif %}">
+                        {{ item.get_status_display }}
+                    </span>
+                    
+{% if item.status == 'active' or item.status == 'pending' %}
+                        <div style="float: right; display: flex; gap: 10px;">
+                            
+                            {% if item.status == 'pending' %}
+                            <form action="{% url 'item:item_refuse_sale' item.id %}" method="post" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;" onclick="return confirm('Are you sure you want to refuse this sale and return the item to the market?');">
+                                    Refuse Sale
+                                </button>
+                            </form>
+                            {% endif %}
+                            
+                            <form action="{% url 'item:item_mark_sold' item.id %}" method="post" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;">
+                                    Confirm & Mark as Sold
+                                </button>
+                            </form>
+                            
+                        </div>
+                        <div style="clear: both;"></div>
                     {% endif %}
                 </li>
+                {% endif %}
+                
             {% endfor %}
         </ul>
     {% else %}

@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ItemForm
 from .models import Category, Item
+from django.http import Http404, JsonResponse  # <-- Added JsonResponse here
 
 
 def item(request, item_id):
@@ -69,18 +70,13 @@ def item_category(request, slug):
     qs = Item.objects.filter(category=category, status=Item.Status.ACTIVE).order_by("-created_at")
     return render(request, "item/item_list.html", {"items": qs, "category": category, "categories": categories})
 
-
 def item_tag(request, tag_slug):
-    #currently have no Tag model/field, so this is a placeholder.
-    #once add tags, implement filtering here.
     return render(request, "item/not_implemented.html", {"feature": "tag"})
-
 
 def item_list(request):
     categories = Category.objects.all()
     qs = Item.objects.filter(status=Item.Status.ACTIVE).order_by("-created_at")
     return render(request, "item/item_list.html", {"items": qs, "categories": categories})
-
 
 def item_search(request):
     q = (request.GET.get("q") or "").strip()
@@ -88,7 +84,27 @@ def item_search(request):
     if q:
         qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
     qs = qs.order_by("-created_at")
-    return render(request, "item/item_search.html", {"items": qs, "q": q})
+    
+    # NEW: Check if this is an AJAX "live search" request
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # We only return the top 5 results for the dropdown to keep it clean
+        results = []
+        for item in qs[:5]:
+            results.append({
+                'id': item.id,
+                'title': item.title,
+                'price': str(item.price),
+                'image_url': item.image.url if item.image else '',
+            })
+        return JsonResponse({'status': 'success', 'results': results})
+
+    # Existing standard response (for when they press Enter)
+    categories = Category.objects.all()
+    return render(request, "item/item_list.html", {
+        "items": qs, 
+        "categories": categories, 
+        "search_query": q  
+    })
 
 
 @login_required
@@ -103,9 +119,37 @@ def item_mark_sold(request, item_id):
     if request.method == "POST":
         obj.status = Item.Status.SOLD
         obj.save(update_fields=["status", "updated_at"])
+        
+        # Clean up the backend: Change the associated order to "completed"
+        from order.models import Order
+        Order.objects.filter(item=obj, status__in=["pending", "paid"]).update(status="completed")
+        
         messages.success(request, f'"{obj.title}" has been successfully marked as Sold!')
     return redirect("item:my_item")
 
+@login_required
+def item_refuse_sale(request, item_id):
+    obj = get_object_or_404(Item, pk=item_id, seller=request.user)
+    if request.method == "POST":
+        if obj.status == Item.Status.PENDING:
+            from order.models import Order
+            
+            # Find the active orders holding this item hostage and cancel them
+            active_orders = Order.objects.filter(item=obj, status__in=["pending", "paid"])
+            restored_stock = 0
+            for order in active_orders:
+                restored_stock += order.quantity
+                order.status = "cancelled"
+                order.save(update_fields=["status"])
+            
+            # Put the item back on the market and restore its stock!
+            obj.status = Item.Status.ACTIVE
+            obj.stock += restored_stock
+            obj.save(update_fields=["status", "stock", "updated_at"])
+            
+            messages.success(request, f'Sale refused. "{obj.title}" is back on the active market!')
+            
+    return redirect("item:my_item")
 
 """JUST FOR TEST!!!"""
 def item_test(request):

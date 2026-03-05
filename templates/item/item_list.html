@@ -75,7 +75,13 @@
         </div>
     </aside>
 
-    <main class="main-content">
+<main class="main-content">
+        
+        {% if search_query %}
+            <h2 class="page-header" style="border-bottom: 2px solid #007bff; display: inline-block; padding-bottom: 5px;">
+                Search Results for "{{ search_query }}"
+            </h2>
+        {% endif %}
         
         {% if items %}
             <div class="item-grid">
@@ -106,6 +112,7 @@
                 <p style="color: #999; margin: 0;">Merchants will be adding products soon!</p>
             </div>
         {% endif %}
+        
     </main>
 
 </div>

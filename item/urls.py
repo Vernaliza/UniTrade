@@ -18,4 +18,6 @@ urlpatterns = [
     path("tag/<slug:tag_slug>/", views.item_tag, name="item_tag"),
     path("test/", views.item_test, name="item_test"),
     path("<int:item_id>/sold/", views.item_mark_sold, name="item_mark_sold"),
+
+    path("<int:item_id>/refuse/", views.item_refuse_sale, name="item_refuse_sale"),
 ]

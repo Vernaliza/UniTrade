@@ -27,12 +27,17 @@ def item_image_path(instance, filename):
 class Item(models.Model):
     class Status(models.TextChoices):
         ACTIVE = "active", "Active"
+        PENDING = "pending", "Pending"   # <--- NEW: Added Pending state
         SOLD = "sold", "Sold"
         DELISTED = "delisted", "Delisted"
         HIDDEN = "hidden", "Hidden"
         DELETED = "deleted", "Deleted"
 
-
+    class Condition(models.TextChoices):
+        NEW = "new", "Brand New"
+        LIKE_NEW = "like_new", "Like New / Open Box"
+        GOOD = "good", "Good / Used"
+        FAIR = "fair", "Fair / Acceptable"
 
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -42,6 +47,7 @@ class Item(models.Model):
     seller = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="items", )
     image = models.ImageField(upload_to=item_image_path, blank=True, null=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE, db_index=True, )
+    condition = models.CharField(max_length=20, choices=Condition.choices, default=Condition.GOOD)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
