@@ -5,6 +5,8 @@ db.sqlite3
 .env
 .vscode/
 *.log
+config/local_settings.py
+local_settings.py
 
 # Ignore media files (user-uploaded content)
 media/
