@@ -40,8 +40,56 @@
         .nav-links a:hover { background-color: #f0f0f0; border-radius: 4px; }
         
         /* Button */
-        .btn-publish { background: #007bff; color: #fff !important; border-radius: 4px; border: none; }
-        .btn-publish:hover { background: #0056b3; }
+        .btn-publish {
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            font-weight: 700;
+            font-size: 15px;
+
+            padding: 10px 22px; 
+            margin-right: 5px;
+            border-radius: 8px; 
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: #fff !important;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.25);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* hover */
+        .btn-publish:hover {
+            background: linear-gradient(135deg, #0088ff 0%, #0062cc 100%);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.45);
+            opacity: 1;
+        }
+
+        .btn-publish:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            background: radial-gradient(
+                circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+                rgba(255, 255, 255, 0.3) 10%,
+                rgba(255, 255, 255, 0) 60%
+            );
+            
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .btn-publish:hover:after {
+            opacity: 1;
+        }
 
         /* Message */
         .alert { padding: 15px; margin: 20px 30px; border-radius: 4px; font-weight: bold; }
@@ -122,6 +170,18 @@
 
 <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+            const publishBtns = document.querySelectorAll('.btn-publish');
+            publishBtns.forEach(btn => {
+                btn.addEventListener('mousemove', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    this.style.setProperty('--mouse-x', `${x}%`);
+                    this.style.setProperty('--mouse-y', `${y}%`);
+                });
+            });
+
             const searchInput = document.getElementById('live-search-input');
             const dropdown = document.getElementById('search-results-dropdown');
             const categoryInput = document.querySelector('input[name="category"]'); // Grab category if it exists
