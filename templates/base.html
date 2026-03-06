@@ -63,7 +63,12 @@
 <div class="search-bar">
                 <form action="{% url 'item:item_search' %}" method="GET">
                     <input type="text" id="live-search-input" name="q" placeholder="Search items (e.g. Textbooks)..." aria-label="Search items" autocomplete="off">
+                    
+                    {% if category %}
+                        <input type="hidden" name="category" value="{{ category.slug }}">
+                    {% endif %}
                 </form>
+                
                 <div id="search-results-dropdown" class="search-dropdown"></div>
             </div>
 
@@ -115,18 +120,27 @@
 
     {% block extra_js %}{% endblock %}
 
-    <script>
+<script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('live-search-input');
             const dropdown = document.getElementById('search-results-dropdown');
+            const categoryInput = document.querySelector('input[name="category"]'); // Grab category if it exists
 
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
                     const query = this.value.trim();
 
                     if (query.length > 0) {
+                        // Build the URL with the search query
+                        let fetchUrl = `{% url 'item:item_search' %}?q=${encodeURIComponent(query)}`;
+                        
+                        // If we are inside a category, attach it to the live search URL!
+                        if (categoryInput) {
+                            fetchUrl += `&category=${categoryInput.value}`;
+                        }
+
                         // Fetch data from our backend secretly
-                        fetch(`{% url 'item:item_search' %}?q=${encodeURIComponent(query)}`, {
+                        fetch(fetchUrl, {
                             headers: { 'X-Requested-With': 'XMLHttpRequest' }
                         })
                         .then(response => response.json())
