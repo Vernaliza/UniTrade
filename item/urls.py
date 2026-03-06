@@ -19,5 +19,7 @@ urlpatterns = [
     path("test/", views.item_test, name="item_test"),
     path("<int:item_id>/sold/", views.item_mark_sold, name="item_mark_sold"),
 
-    path("<int:item_id>/refuse/", views.item_refuse_sale, name="item_refuse_sale"),
+    # path("<int:item_id>/refuse/", views.item_refuse_sale, name="item_refuse_sale"),
+    path("order/<int:order_id>/approve/", views.order_approve, name="order_approve"),
+    path("order/<int:order_id>/refuse/", views.order_refuse, name="order_refuse"),
 ]
