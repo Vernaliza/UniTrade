@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from flask import request
 from .forms import ItemForm
 from .models import Category, Item
 from django.http import Http404, JsonResponse  # <-- Added JsonResponse here
@@ -54,7 +55,16 @@ def item_create(request):
             obj.seller = request.user
             obj.status = Item.Status.ACTIVE  # or HIDDEN if you want moderation flow
             obj.save()
+            messages.success(request, f"Successfully published: {obj.title}!")
             return redirect("item:item_detail", item_id=obj.id)
+        else:
+            # get error messages from the form and display them
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == "__all__":
+                        messages.error(request, f"Error: {error}")
+                    else:
+                        messages.error(request, error)
     else:
         form = ItemForm()
     return render(request, "item/item_form.html", {"form": form})
