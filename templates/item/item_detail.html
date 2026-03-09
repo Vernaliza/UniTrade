@@ -238,9 +238,9 @@
                     <input type="hidden" name="item_id" value="{{ item.id }}">
                     <input type="hidden" name="quantity" value="1"> 
                     
-                    <p style="color: blue; font-weight: bold; text-align: center;">
+                    <!-- <p style="color: blue; font-weight: bold; text-align: center;">
                         Debug: current status is [{{ item.status }}]
-                    </p>
+                    </p> -->
 
                     {% if item.status == 'active' and item.stock > 0 %}
                         <button type="button" id="btn-submit-basket" class="btn-basket" style="background-color: #4CAF50; color: white;">
