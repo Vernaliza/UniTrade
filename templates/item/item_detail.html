@@ -238,13 +238,17 @@
                     <input type="hidden" name="item_id" value="{{ item.id }}">
                     <input type="hidden" name="quantity" value="1"> 
                     
-                    {% if item.status == 'ACTIVE' and item.stock > 0 %}
+                    <p style="color: blue; font-weight: bold; text-align: center;">
+                        Debug: current status is [{{ item.status }}]
+                    </p>
+
+                    {% if item.status == 'active' and item.stock > 0 %}
                         <button type="button" id="btn-submit-basket" class="btn-basket" style="background-color: #4CAF50; color: white;">
                             Add to Basket
                         </button>
                         <p style="font-size: 13px; color: #28a745; margin-top: 8px; text-align: center;">In Stock: {{ item.stock }}</p>
 
-                    {% elif item.status != 'ACTIVE' %}
+                    {% elif item.status != 'active' %}
                         <button type="button" class="btn-basket" disabled style="background-color: #cccccc; color: #666666; cursor: not-allowed; border: 1px solid #bbbbbb;">
                             Item Unavailable
                         </button>
