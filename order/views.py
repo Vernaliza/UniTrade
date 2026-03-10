@@ -50,6 +50,11 @@ def order_create(request):
                 amount=(item.price * qty),
                 status='pending',
             )
+            # --- NEW: Deduct the stock and update status! ---
+            item.stock -= qty
+            if item.stock == 0:
+                item.status = Item.Status.PENDING # Mark as pending if sold out
+            item.save(update_fields=['stock', 'status'])
 
             return JsonResponse({
                 'status': 'success',
@@ -114,6 +119,18 @@ def order_cancel(request, order_id):
             notification_type="order_cancelled",
             content=f"Order {order.order_id} has been cancelled."
         )
+        order.item.stock += order.quantity
+        if order.item.status != "active":
+            order.item.status = "active"
+            
+        order.item.save(update_fields=["stock", "status"])
+        # -------------------------------------------
+        
+        # If the item was hidden/pending/sold because it was out of stock, make it active again!
+        if order.item.status != "active":
+            order.item.status = "active"
+            
+        order.item.save(update_fields=["stock", "status"])
 
         if hasattr(order.item, "status") and order.item.status == "sold":
             order.item.status = "active"
@@ -122,7 +139,7 @@ def order_cancel(request, order_id):
     return JsonResponse({
         "status": "success",
         "message": "Order cancelled successfully",
-        "redirect_url": reverse("order:order_detail", args=[order.id])
+        "redirect_url": reverse("order:order_list") # 取消后跳到订单列表，订单列表里有详细信息了
     })
 
 
@@ -419,6 +436,10 @@ def basket_checkout(request):
                                      quantity=bi.quantity, amount=bi.subtotal(), status="pending", )
 
         created_order_ids.append(order.id)
+        item.stock -= bi.quantity
+        if item.stock == 0:
+            item.status = Item.Status.PENDING 
+        item.save(update_fields=['stock', 'status'])
 
     basket.items.all().delete()
 

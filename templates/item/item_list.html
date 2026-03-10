@@ -4,10 +4,17 @@
 
 {% block content %}
 <style>
-    /* 页面整体左右布局 */
-    .page-container { display: flex; max-width: 1200px; margin: 40px auto; gap: 30px; padding: 0 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    /* Layout */
+    .page-container { 
+        display: flex;
+        max-width: 1200px;
+        margin: 40px auto;
+        gap: 30px;
+        padding: 0 20px;
+        perspective: 1500px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     
-    /* 左侧分类栏 */
+    /* Left Sidebar */
     .sidebar { width: 250px; flex-shrink: 0; }
     .sidebar-card { background: white; border: 1px solid #eee; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
     .sidebar-title { margin-top: 0; margin-bottom: 20px; color: #333; font-size: 18px; border-bottom: 2px solid #f8f9fa; padding-bottom: 10px; font-weight: bold; }
@@ -16,29 +23,54 @@
     .category-list a { text-decoration: none; color: #555; display: block; padding: 10px 12px; border-radius: 6px; transition: 0.2s ease; }
     .category-list a:hover { background: #f0f7ff; color: #007bff; font-weight: 500; }
 
-    /* 右侧商品网格 */
+    /* Right Main Content */
     .main-content { flex-grow: 1; }
     .page-header { margin-top: 0; margin-bottom: 20px; color: #333; font-size: 24px; }
     .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
     
-    /* 💥 商品卡片（包含核心悬浮动画） */
-    .item-card { 
+    .item-card {
         display: block; text-decoration: none; color: inherit;
         background: white; border: 1px solid #eee; border-radius: 12px; 
         overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        transition: transform 0.3s ease, box-shadow 0.3s ease; 
+
+        transform-style: preserve-3d;
+        transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+        position: relative;
     }
-    .item-card:hover { 
-        transform: translateY(-6px); /* 向上浮动 */
-        box-shadow: 0 12px 24px rgba(0,0,0,0.12); /* 阴影加深扩散 */
+
+    .item-card:hover {
+        transform: translateZ(10px) scale(1.03);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+    }
+
+    .item-card:hover:after {
+        opacity: 1;
+    }
+
+    .item-card:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+            rgba(255, 255, 255, 0.6) 0%, 
+            rgba(255, 255, 255, 0) 70%
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        z-index: 10;
     }
     
-    /* 图片容器与动画 */
     .item-img-container { height: 180px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden; border-bottom: 1px solid #f5f5f5; }
     .item-img-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-    .item-card:hover .item-img-container img { transform: scale(1.05); } /* 悬浮时图片轻微放大，非常有质感 */
+    .item-card:hover .item-img-container img {
+        transform: translateZ(20px);
+    }
     
-    /* 卡片文字信息 */
     .item-info { padding: 16px; }
     .item-title { margin: 0 0 8px 0; font-size: 16px; color: #333; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .item-price { margin: 0 0 8px 0; color: #d9534f; font-weight: bold; font-size: 18px; }
@@ -78,9 +110,19 @@
 <main class="main-content">
         
         {% if search_query %}
-            <h2 class="page-header" style="border-bottom: 2px solid #007bff; display: inline-block; padding-bottom: 5px;">
-                Search Results for "{{ search_query }}"
-            </h2>
+            <div style="display: flex; align-items: baseline; margin-bottom: 20px;">
+                <h2 class="page-header" style="margin: 0; border-bottom: 2px solid #007bff; display: inline-block; padding-bottom: 5px;">
+                    Search Results for "{{ search_query }}"
+                </h2>
+                
+                <a href="{% if category %}{% url 'item:item_category' category.slug %}{% else %}{% url 'item:item_list' %}{% endif %}" 
+                   style="margin-left: 15px; text-decoration: none; color: #007bff; font-size: 28px; line-height: 1; transition: transform 0.2s; display: inline-block;"
+                   onmouseover="this.style.transform='scale(1.2)'" 
+                   onmouseout="this.style.transform='scale(1)'"
+                   title="Clear Search">
+                    &times;
+                </a>
+            </div>
         {% endif %}
         
         {% if items %}
@@ -116,4 +158,46 @@
     </main>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.item-card');
+
+        cards.forEach(card => {
+            card.addEventListener('mousemove', function(e) {
+                const cardRect = this.getBoundingClientRect();
+                const cardWidth = cardRect.width;
+                const cardHeight = cardRect.height;
+
+                const mouseX = e.clientX - cardRect.left - cardWidth / 2;
+                const mouseY = e.clientY - cardRect.top - cardHeight / 2;
+
+                const tiltX = (mouseY / (cardHeight / 2)) * -10; 
+                const tiltY = (mouseX / (cardWidth / 2)) * 10; 
+
+                this.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.02, 1.02, 1.02)`;
+                
+                const shadowX = tiltY * -1;
+                const shadowY = tiltX * -1;
+                this.style.boxShadow = `${shadowX}px ${shadowY + 15}px 30px rgba(0,0,0,0.15)`;
+
+                const relX = e.clientX - cardRect.left; 
+                const relY = e.clientY - cardRect.top;
+                
+                const pctX = (relX / cardWidth * 100).toFixed(2);
+                const pctY = (relY / cardHeight * 100).toFixed(2);
+                
+                this.style.setProperty('--mouse-x', `${pctX}%`);
+                this.style.setProperty('--mouse-y', `${pctY}%`);
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+            });
+        });
+    });
+</script>
 {% endblock %}

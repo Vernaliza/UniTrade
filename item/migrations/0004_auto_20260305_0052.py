@@ -27,6 +27,7 @@ class Migration(migrations.Migration):
     
     dependencies = [
         # (Leave whatever Django put here)
+        ('item', '0003_item_condition'),
     ]
 
     operations = [

@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+# from flask import request
 from .forms import ItemForm
 from .models import Category, Item
 from django.http import Http404, JsonResponse  # <-- Added JsonResponse here
@@ -20,8 +21,9 @@ def item(request, item_id):
     obj = get_object_or_404(Item, pk=item_id)
 
     # Public can only view active items; owner can view their own
-    if obj.status != Item.Status.ACTIVE and obj.seller_id != getattr(request.user, "id", None):
-        raise Http404("Item not found")
+    # ! Front end deal with it, thus buyer can see details what they bought if it's delisted.
+    # if obj.status != Item.Status.ACTIVE and obj.seller_id != getattr(request.user, "id", None):
+    #     raise Http404("Item not found")
 
     reviews = (
         Review.objects.filter(order__item=obj)
@@ -54,7 +56,16 @@ def item_create(request):
             obj.seller = request.user
             obj.status = Item.Status.ACTIVE  # or HIDDEN if you want moderation flow
             obj.save()
+            messages.success(request, f"Successfully published: {obj.title}!")
             return redirect("item:item_detail", item_id=obj.id)
+        else:
+            # get error messages from the form and display them
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == "__all__":
+                        messages.error(request, f"Error: {error}")
+                    else:
+                        messages.error(request, error)
     else:
         form = ItemForm()
     return render(request, "item/item_form.html", {"form": form})
@@ -145,65 +156,103 @@ def item_search(request):
         "category": current_category,  
         "search_query": q
     })
-    q = (request.GET.get("q") or "").strip()
-    category_slug = request.GET.get("category")  # Catch the hidden category parameter
+    # q = (request.GET.get("q") or "").strip()
+    # category_slug = request.GET.get("category")  # Catch the hidden category parameter
     
-    qs = Item.objects.filter(status=Item.Status.ACTIVE)
+    # qs = Item.objects.filter(status=Item.Status.ACTIVE)
     
-    # 1. If a category was passed, filter the items by that category FIRST
-    current_category = None
-    if category_slug:
-        current_category = get_object_or_404(Category, slug=category_slug)
-        qs = qs.filter(category=current_category)
+    # # 1. If a category was passed, filter the items by that category FIRST
+    # current_category = None
+    # if category_slug:
+    #     current_category = get_object_or_404(Category, slug=category_slug)
+    #     qs = qs.filter(category=current_category)
         
-    # 2. Then apply the text search keyword
-    if q:
-        qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
+    # # 2. Then apply the text search keyword
+    # if q:
+    #     qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
         
-    qs = qs.order_by("-created_at")
+    # qs = qs.order_by("-created_at")
     
-    # Pass everything back to your beautiful item_list grid
-    categories = Category.objects.all()
-    return render(request, "item/item_list.html", {
-        "items": qs, 
-        "categories": categories,
-        "category": current_category,  # Keeps the sidebar category highlighted!
-        "search_query": q
-    })
-    q = (request.GET.get("q") or "").strip()
-    qs = Item.objects.filter(status=Item.Status.ACTIVE)
-    if q:
-        qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
-    qs = qs.order_by("-created_at")
+    # # Pass everything back to your beautiful item_list grid
+    # categories = Category.objects.all()
+    # return render(request, "item/item_list.html", {
+    #     "items": qs, 
+    #     "categories": categories,
+    #     "category": current_category,  # Keeps the sidebar category highlighted!
+    #     "search_query": q
+    # })
+    # q = (request.GET.get("q") or "").strip()
+    # qs = Item.objects.filter(status=Item.Status.ACTIVE)
+    # if q:
+    #     qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
+    # qs = qs.order_by("-created_at")
     
-    # NEW: Check if this is an AJAX "live search" request
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        # We only return the top 5 results for the dropdown to keep it clean
-        results = []
-        for item in qs[:5]:
-            results.append({
-                'id': item.id,
-                'title': item.title,
-                'price': str(item.price),
-                'image_url': item.image.url if item.image else '',
-            })
-        return JsonResponse({'status': 'success', 'results': results})
+    # # NEW: Check if this is an AJAX "live search" request
+    # if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    #     # We only return the top 5 results for the dropdown to keep it clean
+    #     results = []
+    #     for item in qs[:5]:
+    #         results.append({
+    #             'id': item.id,
+    #             'title': item.title,
+    #             'price': str(item.price),
+    #             'image_url': item.image.url if item.image else '',
+    #         })
+    #     return JsonResponse({'status': 'success', 'results': results})
 
-    # Existing standard response (for when they press Enter)
-    categories = Category.objects.all()
-    return render(request, "item/item_list.html", {
-        "items": qs, 
-        "categories": categories, 
-        "search_query": q  
-    })
+    # # Existing standard response (for when they press Enter)
+    # categories = Category.objects.all()
+    # return render(request, "item/item_list.html", {
+    #     "items": qs, 
+    #     "categories": categories, 
+    #     "search_query": q  
+    # })
 
+
+# @login_required
+# def my_item(request):
+#     from order.models import Order
+#     display_items = []
+    
+#     # 1. Fetch remaining active items (not reserved)
+#     active_items = Item.objects.filter(seller=request.user, status=Item.Status.ACTIVE).order_by("-created_at")
+#     for item in active_items:
+#         display_items.append({
+#             'is_order': False,
+#             'item_id': item.id,
+#             'title': item.title,
+#             'price': item.price,
+#             'status': item.status,
+#             'status_display': item.get_status_display(),
+#         })
+        
+#     # 2. Fetch pending orders and SPLIT them into individual rows for the template
+#     pending_orders = Order.objects.filter(seller=request.user, status="pending").order_by("-created_time")
+#     for order in pending_orders:
+#         unit_price = order.amount / order.quantity if order.quantity else order.item.price
+        
+#         # If the buyer bought 2, this loop runs 2 times!
+#         for _ in range(order.quantity):
+#             display_items.append({
+#                 'is_order': True,
+#                 'order_id': order.id,
+#                 'item_id': order.item.id,
+#                 'title': order.item.title,
+#                 'price': unit_price,
+#                 'status': 'pending',
+#                 'status_display': 'Pending',
+#                 'buyer_name': order.customer.username,
+#                 'buyer_email': order.customer.email,
+#             })
+            
+#     return render(request, "item/my_item.html", {"display_items": display_items})
 
 @login_required
 def my_item(request):
     from order.models import Order
     display_items = []
     
-    # 1. Fetch remaining active items (not reserved)
+    # 抓取库存商品
     active_items = Item.objects.filter(seller=request.user, status=Item.Status.ACTIVE).order_by("-created_at")
     for item in active_items:
         display_items.append({
@@ -215,24 +264,34 @@ def my_item(request):
             'status_display': item.get_status_display(),
         })
         
-    # 2. Fetch pending orders and SPLIT them into individual rows for the template
-    pending_orders = Order.objects.filter(seller=request.user, status="pending").order_by("-created_time")
-    for order in pending_orders:
-        unit_price = order.amount / order.quantity if order.quantity else order.item.price
-        
-        # If the buyer bought 2, this loop runs 2 times!
-        for _ in range(order.quantity):
-            display_items.append({
-                'is_order': True,
-                'order_id': order.id,
-                'item_id': order.item.id,
-                'title': order.item.title,
-                'price': unit_price,
-                'status': 'pending',
-                'status_display': 'Pending',
-                'buyer_name': order.customer.username,
-                'buyer_email': order.customer.email,
-            })
+    # 把 "paid" (已付款) 订单也加进查询范围，绝不漏单！
+    active_orders = Order.objects.filter(
+        seller=request.user, 
+        status__in=["pending", "paid"]
+    ).order_by("-created_time")
+    
+    for order in active_orders:
+        # 尝试获取买家地址 (如果你们系统 User Profile 里有地址字段的话，没有的话前端会显示 Default)
+        address = getattr(order.customer, 'profile', None)
+        buyer_address = address.address if hasattr(address, 'address') else ""
+
+        # 直接把整个订单传给前端，前端根据 quantity 显示多少行
+        display_items.append({
+            'is_order': True,
+            'order_id': order.id,
+            'item_id': order.item.id,
+            'title': order.item.title,
+            'price': order.amount / order.quantity if order.quantity else order.item.price, # 单价
+            
+            'amount': order.amount,     # 订单总价
+            'quantity': order.quantity, # 购买数量
+            'buyer_address': buyer_address, # 买家地址
+            
+            'status': order.status,     # 'pending' 或 'paid'
+            'status_display': order.status.title(), # 'Pending' 或 'Paid'
+            'buyer_name': order.customer.username,
+            'buyer_email': order.customer.email,
+        })
             
     return render(request, "item/my_item.html", {"display_items": display_items})
 
@@ -247,76 +306,75 @@ def item_mark_sold(request, item_id):
         messages.success(request, f'"{obj.title}" manually marked as Sold!')
     return redirect("item:my_item")
 
+# Fixed 
 @login_required
 def order_approve(request, order_id):
     from order.models import Order
     order = get_object_or_404(Order, pk=order_id, seller=request.user)
+    
     if request.method == "POST":
-        unit_price = order.amount / order.quantity if order.quantity else 0
+        order.status = "completed"
+        order.save(update_fields=["status"])
         
-        # If order quantity is > 1, we peel off 1 item from the order and complete it
-        if order.quantity > 1:
-            order.quantity -= 1
-            order.amount -= unit_price
-            order.save()
-            Order.objects.create(
-                order_id=order.order_id + "-A", customer=order.customer, seller=order.seller,
-                item=order.item, quantity=1, amount=unit_price, status="completed"
-            )
-        else:
-            order.status = "completed"
-            order.save(update_fields=["status"])
-            
         item = order.item
-        if item.stock == 0 and not Order.objects.filter(item=item, status="pending").exists():
+        if item.stock <= 0 and not Order.objects.filter(item=item, status__in=["pending", "paid"]).exists():
             item.status = Item.Status.SOLD
             item.save(update_fields=["status", "updated_at"])
-        messages.success(request, f'One unit of {item.title} approved!')
+            
+        messages.success(request, f'Order #{order.order_id} has been successfully confirmed and completed!')
+        
     return redirect("item:my_item")
+
+# @login_required
+# def order_approve(request, order_id):
+#     from order.models import Order
+#     order = get_object_or_404(Order, pk=order_id, seller=request.user)
+#     if request.method == "POST":
+#         unit_price = order.amount / order.quantity if order.quantity else 0
+        
+#         # If order quantity is > 1, we peel off 1 item from the order and complete it
+#         if order.quantity > 1:
+#             order.quantity -= 1
+#             order.amount -= unit_price
+#             order.save()
+#             Order.objects.create(
+#                 order_id=order.order_id + "-A", customer=order.customer, seller=order.seller,
+#                 item=order.item, quantity=1, amount=unit_price, status="completed"
+#             )
+#         else:
+#             order.status = "completed"
+#             order.save(update_fields=["status"])
+            
+#         item = order.item
+#         if item.stock == 0 and not Order.objects.filter(item=item, status="pending").exists():
+#             item.status = Item.Status.SOLD
+#             item.save(update_fields=["status", "updated_at"])
+#         messages.success(request, f'One unit of {item.title} approved!')
+#     return redirect("item:my_item")
 
 @login_required
 def order_refuse(request, order_id):
     from order.models import Order
     order = get_object_or_404(Order, pk=order_id, seller=request.user)
+    
     if request.method == "POST":
-        unit_price = order.amount / order.quantity if order.quantity else 0
-        
-        if order.quantity > 1:
-            order.quantity -= 1
-            order.amount -= unit_price
-            order.save()
-        else:
-            order.status = "cancelled"
-            order.save(update_fields=["status"])
-            
         item = order.item
-        item.stock += 1
-        if item.status in [Item.Status.PENDING, Item.Status.SOLD]:
+        # 无论订单数量是多少，都直接拒绝整个订单，并把所有数量的库存退回市场
+        item.stock += order.quantity
+
+        # 除非这个是手动下架的商品才不会重新上架，否则一律改回 ACTIVE 状态
+        if item.status == "pending" or item.status == Item.Status.PENDING:
             item.status = Item.Status.ACTIVE
+
         item.save(update_fields=["stock", "status", "updated_at"])
-        messages.success(request, f'Sale refused. Stock returned to the market.')
+
+        order.status = "cancelled"
+        order.save(update_fields=["status"])
+        
+        messages.success(request, f'Sale fully refused. {order.quantity} stock(s) returned to the market.')
+        
     return redirect("item:my_item")
-    obj = get_object_or_404(Item, pk=item_id, seller=request.user)
-    if request.method == "POST":
-        if obj.status == Item.Status.PENDING:
-            from order.models import Order
-            
-            # Find the active orders holding this item hostage and cancel them
-            active_orders = Order.objects.filter(item=obj, status__in=["pending", "paid"])
-            restored_stock = 0
-            for order in active_orders:
-                restored_stock += order.quantity
-                order.status = "cancelled"
-                order.save(update_fields=["status"])
-            
-            # Put the item back on the market and restore its stock!
-            obj.status = Item.Status.ACTIVE
-            obj.stock += restored_stock
-            obj.save(update_fields=["status", "stock", "updated_at"])
-            
-            messages.success(request, f'Sale refused. "{obj.title}" is back on the active market!')
-            
-    return redirect("item:my_item")
+
 
 """JUST FOR TEST!!!"""
 def item_test(request):

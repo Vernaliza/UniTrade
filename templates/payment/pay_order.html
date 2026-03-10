@@ -1,109 +1,122 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Mock Payment (For temporary use only, it needs to be changed to the official version)</title>
+{% extends 'base.html' %}
+{% block title %}Secure Checkout - UniTrade{% endblock %}
 
-    <style>
-        body{
-            font-family: Arial, Helvetica, sans-serif;
-            background:#f5f6fa;
-            margin:0;
-            padding:0;
-        }
+{% block extra_css %}
+<style>
+    .checkout-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+    }
+    .checkout-card {
+        background: #fff;
+        width: 100%;
+        max-width: 480px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        padding: 40px;
+        text-align: center;
+    }
+    .checkout-header h2 {
+        margin: 0; font-size: 28px; color: #333;
+    }
+    .checkout-header p {
+        color: #888; font-size: 14px; margin-top: 5px; margin-bottom: 30px;
+    }
+    /* 高级感“小票”布局 */
+    .receipt-box {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 25px;
+        text-align: left;
+        margin-bottom: 30px;
+    }
+    .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 15px;
+        color: #555;
+    }
+    .receipt-row.total {
+        border-top: 1px dashed #ccc;
+        margin-top: 15px;
+        padding-top: 15px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+    .receipt-row.total .price {
+        color: #28a745;
+        font-size: 24px;
+    }
 
-        .container{
-            width:600px;
-            margin:80px auto;
-            background:white;
-            padding:40px;
-            border-radius:12px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.08);
-        }
+    .btn-pay-now {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 16px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        color: #fff !important;
+        font-weight: bold;
+        font-size: 18px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.25);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+        transform: translateZ(0);
+    }
+    .btn-pay-now:hover {
+        transform: translateY(-3px) translateZ(0);
+        box-shadow: 0 12px 28px rgba(40, 167, 69, 0.45);
+    }
+    .cancel-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #999;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.2s;
+    }
+    .cancel-link:hover { color: #dc3545; }
+</style>
+{% endblock %}
 
-        h2{
-            margin-top:0;
-            text-align:center;
-        }
+{% block content %}
+<div class="checkout-wrapper">
+    <div class="checkout-card">
+        <div class="checkout-header">
+            <h2>Secure Checkout</h2>
+            <p>Review your order before payment</p>
+        </div>
 
-        .order-info{
-            margin-top:25px;
-            line-height:1.9;
-            font-size:16px;
-        }
-
-        .order-info p{
-            margin:6px 0;
-        }
-
-        .btn-area{
-            margin-top:35px;
-            text-align:center;
-        }
-
-        .pay-btn{
-            background:#28a745;
-            color:white;
-            border:none;
-            padding:12px 28px;
-            font-size:16px;
-            border-radius:8px;
-            cursor:pointer;
-        }
-
-        .pay-btn:hover{
-            background:#218838;
-        }
-
-        .back-link{
-            display:inline-block;
-            margin-left:15px;
-            text-decoration:none;
-            color:#555;
-            font-size:15px;
-        }
-
-        .back-link:hover{
-            text-decoration:underline;
-        }
-
-    </style>
-</head>
-
-
-<body>
-
-<div class="container">
-
-    <h2>Mock Payment Page</h2>
-
-    <div class="order-info">
-        <p><strong>Order ID:</strong> {{ order.order_id }}</p>
-        <p><strong>Item:</strong> {{ order.item.title }}</p>
-        <p><strong>Quantity:</strong> {{ order.quantity }}</p>
-        <p><strong>Amount:</strong> £{{ order.amount }}</p>
-        <p><strong>Transaction No:</strong> {{ payment.transaction_no }}</p>
-        <p><strong>Status:</strong> {{ payment.status }}</p>
-    </div>
-
-    <div class="btn-area">
+        <div class="receipt-box">
+            <div class="receipt-row">
+                <span>Order ID</span>
+                <strong>#{{ order.order_id }}</strong>
+            </div>
+            <div class="receipt-row">
+                <span>Item</span>
+                <strong>{{ order.item.title }}</strong>
+            </div>
+            <div class="receipt-row">
+                <span>Quantity</span>
+                <strong>x{{ order.quantity }}</strong>
+            </div>
+            <div class="receipt-row total">
+                <span>Total Amount</span>
+                <span class="price">£{{ order.amount }}</span>
+            </div>
+        </div>
 
         <form method="post" action="{% url 'payment:pay_confirm' order.id %}">
             {% csrf_token %}
-            <button class="pay-btn" type="submit">
-                Confirm Mock Payment
-            </button>
+            <button type="submit" class="btn-pay-now">Confirm & Pay</button>
         </form>
 
-        <br><br>
-
-        <a class="back-link" href="{% url 'order:order_detail' order.id %}">
-            Back to Order
-        </a>
-
+        <a href="{% url 'order:order_list' %}" class="cancel-link">Cancel Payment</a>
     </div>
-
 </div>
-
-</body>
-</html>
+{% endblock %}

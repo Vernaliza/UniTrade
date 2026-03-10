@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from django.utils.text import slugify
+from decimal import Decimal
 
 
 class Category(models.Model):
@@ -41,8 +42,8 @@ class Item(models.Model):
 
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)], )
-    stock = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)], )
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))], ) # fix price min limit
+    stock = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(999)])
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="items", )
     seller = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="items", )
     image = models.ImageField(upload_to=item_image_path, blank=True, null=True)

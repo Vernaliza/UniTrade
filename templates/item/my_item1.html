@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}My Shop - UniTrade{% endblock %}
+
+{% block content %}
+<!-- <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <h2>My Shop Dashboard</h2>
+    
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'item:item_create' %}" class="btn-publish" style="padding: 10px 15px; text-decoration: none;">+ Add New Item</a>
+    </div> -->
+
+    <!-- <hr> -->
+
+<h3>My Active Listings</h3>
+    {% if display_items %}
+        <ul style="list-style-type: none; padding: 0;">
+            {% for row in display_items %}
+                <li style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px; background-color: #fff;">
+                    
+                    <strong>
+                        <a href="{% url 'item:item_detail' row.item_id %}" style="text-decoration: none; color: #007bff; font-size: 18px;">
+                            {{ row.title }}
+                        </a>
+                    </strong> 
+                    - £{{ row.price|floatformat:2 }}
+                    
+                    <span style="margin-left: 10px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; 
+                        {% if row.status == 'active' %}background-color: #d4edda; color: #155724;
+                        {% elif row.status == 'pending' %}background-color: #fff3cd; color: #856404;{% endif %}">
+                        {{ row.status_display }}
+                    </span>
+
+                    {% if row.is_order %}
+                        <span style="margin-left: 15px; color: #555; font-size: 14px;">
+                            👤 <strong>Buyer:</strong> {{ row.buyer_name }} ({{ row.buyer_email }})
+                        </span>
+                    {% endif %}
+                    
+                    <div style="float: right; display: flex; gap: 10px;">
+                        {% if row.is_order %}
+                            <form action="{% url 'item:order_refuse' row.order_id %}" method="post" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;" onclick="return confirm('Refuse this sale?');">
+                                    Refuse
+                                </button>
+                            </form>
+                            <form action="{% url 'item:order_approve' row.order_id %}" method="post" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                    Confirm Order
+                                </button>
+                            </form>
+                        {% elif row.status == 'active' %}
+                            <form action="{% url 'item:item_mark_sold' row.item_id %}" method="post" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                    Manual Mark as Sold
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                    <div style="clear: both;"></div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't listed any items for sale yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

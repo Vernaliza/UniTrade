@@ -32,7 +32,7 @@
     <h1 class="page-title">📦 My Orders</h1>
 
     {% if orders %}
-        {% for order in orders %}
+        {% for order in orders reversed %}
         <div class="order-card">
             <div class="order-header">
                 <div class="order-header-left">
@@ -59,10 +59,37 @@
                         <div class="contact-info">
                             <h4>Seller Contact</h4>
                             <p>📞 {{ order.item.seller.email|default:"No contact provided" }}</p>
+                        </div> <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if order.status == 'pending' %}
+                                <div style="background: #fff3cd; color: #856404; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #ffeeba;">
+                                    Awaiting Payment
+                                </div>
+                                <a href="{% url 'payment:pay_order' order.id %}" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; text-decoration: none; box-shadow: 0 2px 6px rgba(0,123,255,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                                    Pay Now
+                                </a>
+                                
+                            {% elif order.status == 'paid' %}
+                                <div style="background: #17a2b8; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+                                    Ready to Trade
+                                </div>
+                                
+                            {% elif order.status == 'completed' %}
+                                <div style="background: #28a745; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+                                    Completed
+                                </div>
+                                
+                            {% elif order.status == 'cancelled' %}
+                                <div style="background: #dc3545; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+                                    Cancelled
+                                </div>
+                                
+                            {% else %}
+                                <div style="background: #6c757d; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+                                    {{ order.status|title }}
+                                </div>
+                            {% endif %}
                         </div>
-                        <div class="badge-success">Ready to Trade</div>
                     </div>
-                    
                 </div>
             </div>
         </div>

@@ -47,45 +47,51 @@ def pay_confirm(request, order_id):
     )
 
     if order.status != "pending":
-        return redirect("order:order_detail", order_id=order.id)
+        return redirect("order:order_list")  # 跳到order list就行了因为订单列表已经有详细信息
+        # return redirect("order:order_detail", order_id=order.id)
 
     item = get_object_or_404(Item.objects.select_for_update(), id=order.item_id)
 
-    if item.status != Item.Status.ACTIVE:
-        payment = Payment.objects.filter(order=order, user=request.user).first()
-        if payment:
-            payment.status = "failed"
-            payment.save(update_fields=["status"])
+    # if item.status != Item.Status.ACTIVE:
+    #     payment = Payment.objects.filter(order=order, user=request.user).first()
+    #     if payment:
+    #         payment.status = "failed"
+    #         payment.save(update_fields=["status"])
 
-        return render(request, "payment/pay_failed.html", {
-            "message": "Item is no longer available. Mock payment failed."
-        })
+    #     return render(request, "payment/pay_failed.html", {
+    #         "message": "Item is no longer available. Mock payment failed."
+    #     })
 
-    if item.stock < order.quantity:
-        payment = Payment.objects.filter(order=order, user=request.user).first()
-        if payment:
-            payment.status = "failed"
-            payment.save(update_fields=["status"])
+    # Stock already checked when order was created!
+    # 库存已经在下订单时检查了，所以这里不需要再检查库存。
+    # if item.stock < order.quantity:
+    #     payment = Payment.objects.filter(order=order, user=request.user).first()
+    #     if payment:
+    #         payment.status = "failed"
+    #         payment.save(update_fields=["status"])
 
-        return render(request, "payment/pay_failed.html", {
-            "message": "Not enough stock. Mock payment failed."
-        })
+    #     return render(request, "payment/pay_failed.html", {
+    #         "message": "Not enough stock. Mock payment failed."
+    #     })
 
     payment = get_object_or_404(Payment, order=order, user=request.user)
     payment.status = "success"
     payment.paid_time = timezone.now()
     payment.save(update_fields=["status", "paid_time"])
+
     order.status = "paid"
     order.paid_time = timezone.now()
     order.save(update_fields=["status", "paid_time"])
 
-    item.stock -= order.quantity
-    if item.stock <= 0:
-        item.stock = 0
-        item.status = Item.Status.PENDING
-        item.save(update_fields=["stock", "status"])
-    else:
-        item.save(update_fields=["stock"])
+    # 这里不需要再扣库存了，因为在下订单时已经扣库存了。
+    # Do not need to decrease stock here because stock was already decreased when order was created.
+    # item.stock -= order.quantity
+    # if item.stock <= 0:
+    #     item.stock = 0
+    #     item.status = Item.Status.PENDING
+    #     item.save(update_fields=["stock", "status"])
+    # else:
+    #     item.save(update_fields=["stock"])
 
     Notification.objects.create(
         user=order.seller,

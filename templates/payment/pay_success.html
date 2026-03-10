@@ -1,69 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Payment Success (For temporary use only, it needs to be changed to the official version)</title>
+{% extends 'base.html' %}
+{% block title %}Payment Successful - UniTrade{% endblock %}
 
-    <style>
+{% block extra_css %}
+<style>
+    .status-card {
+        max-width: 450px;
+        margin: 80px auto;
+        background: #fff;
+        padding: 50px 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        text-align: center;
+    }
+    .icon-success {
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+    .status-card h2 { color: #333; margin-top: 0; }
+    .status-card p { color: #666; line-height: 1.6; margin-bottom: 30px; }
+    
+    /* 复用咱们全局的发布按钮类名，但是稍微改宽一点 */
+    .btn-publish.wide {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 15px;
+    }
+</style>
+{% endblock %}
 
-        body{
-            font-family: Arial, Helvetica, sans-serif;
-            background:#f5f6fa;
-            margin:0;
-            padding:0;
-        }
+{% block content %}
+<div class="status-card">
+    <div class="icon-success">🎉</div>
+    <h2>Payment Successful!</h2>
+    <p>Your mock payment has been processed successfully. The seller will be notified to prepare your item.</p>
 
-        .container{
-            width:600px;
-            margin:100px auto;
-            background:white;
-            padding:40px;
-            border-radius:12px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.08);
-            text-align:center;
-        }
-
-        h2{
-            color:#28a745;
-            margin-bottom:15px;
-        }
-
-        p{
-            font-size:16px;
-            color:#444;
-        }
-
-        .btn{
-            display:inline-block;
-            margin-top:30px;
-            padding:12px 25px;
-            background:#007bff;
-            color:white;
-            text-decoration:none;
-            border-radius:8px;
-        }
-
-        .btn:hover{
-            background:#0069d9;
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-    <h2>Payment Successful</h2>
-
-    <p>Your mock payment has been completed successfully.</p>
-
-    <a class="btn" href="{% url 'order:order_detail' order.id %}">
-        View Order
+    <a href="{% url 'order:order_detail' order.id %}" class="btn-publish wide">
+        View Order Details
     </a>
-
 </div>
-
-</body>
-</html>
+{% endblock %}

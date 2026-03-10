@@ -98,20 +98,20 @@
         margin-top: 20px;
     }
 
-    .btn-publish {
+    .btn-submit-form {
         flex: 2;
         padding: 15px;
         background-color: #007bff;
         color: white;
         border: none;
         border-radius: 6px;
-        font-size: 18px;
+        font-size: 18px;    
         font-weight: bold;
         cursor: pointer;
         transition: background 0.2s;
     }
 
-    .btn-publish:hover {
+    .btn-submit-form:hover {
         background-color: #0056b3;
     }
 
@@ -189,7 +189,7 @@
 
             <div class="button-group">
                 <a href="{% url 'item:my_item' %}" class="btn-cancel">Cancel</a>
-                <button type="submit" class="btn-publish">Publish Item Now</button>
+                <button type="submit" class="btn-submit-form">Publish Item Now</button>
             </div>
 
         </div>
@@ -213,7 +213,7 @@
                     
                     // Style it to cover the area without distortion
                     uploadSection.style.backgroundImage = `url('${imageUrl}')`;
-                    uploadSection.style.backgroundSize = 'contain'; // Ensure the entire image fits within the area
+                    uploadSection.style.backgroundSize = 'contain';
                     uploadSection.style.backgroundPosition = 'center';
                     uploadSection.style.backgroundRepeat = 'no-repeat';
                     

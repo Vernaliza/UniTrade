@@ -1,71 +1,131 @@
 {% extends "base.html" %}
 
-{% block title %}My Shop - UniTrade{% endblock %}
+{% block title %}My Shop Dashboard - UniTrade{% endblock %}
 
 {% block content %}
-<!-- <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
-    <h2>My Shop Dashboard</h2>
+<div style="max-width: 900px; margin: 40px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
     
-    <div style="margin-bottom: 20px;">
-        <a href="{% url 'item:item_create' %}" class="btn-publish" style="padding: 10px 15px; text-decoration: none;">+ Add New Item</a>
-    </div> -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="margin: 0; color: #333;">🏪 My Shop Manager</h1>
+        <a href="{% url 'item:item_create' %}" class="btn-publish">+ Add New Item</a>
+    </div>
 
-    <!-- <hr> -->
-
-<h3>My Active Listings</h3>
     {% if display_items %}
-        <ul style="list-style-type: none; padding: 0;">
+        <h3 style="border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 30px; color: #2c3e50;">
+            🛎️ Customer Orders 
+            <span style="font-size: 14px; color: #7f8c8d; font-weight: normal; margin-left: 10px;">(Pending & Paid)</span>
+        </h3>
+        
+        <ul style="list-style-type: none; padding: 0; margin-bottom: 50px;">
             {% for row in display_items %}
-                <li style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px; background-color: #fff;">
-                    
-                    <strong>
-                        <a href="{% url 'item:item_detail' row.item_id %}" style="text-decoration: none; color: #007bff; font-size: 18px;">
-                            {{ row.title }}
-                        </a>
-                    </strong> 
-                    - £{{ row.price|floatformat:2 }}
-                    
-                    <span style="margin-left: 10px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; 
-                        {% if row.status == 'active' %}background-color: #d4edda; color: #155724;
-                        {% elif row.status == 'pending' %}background-color: #fff3cd; color: #856404;{% endif %}">
-                        {{ row.status_display }}
-                    </span>
+                {% if row.is_order %}
+                    <li style="border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 15px; border-radius: 12px; background-color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="flex: 1;">
+                                <strong>
+                                    <a href="{% url 'item:item_detail' row.item_id %}" style="text-decoration: none; color: #007bff; font-size: 18px;">
+                                        {{ row.title }}
+                                    </a>
+                                </strong>
+                                <span style="color: #28a745; font-weight: bold; font-size: 16px;">
+                                    - Total: £{{ row.amount|default:row.price|floatformat:2 }}
+                                </span>
+                                <span style="color: #666; font-size: 14px; margin-left: 5px;">(Qty: {{ row.quantity|default:"1" }})</span>
+                                
+                                <span style="margin-left: 10px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; 
+                                    {% if row.status == 'paid' %}background-color: #d4edda; color: #155724;
+                                    {% elif row.status == 'completed' %}background-color: #cce5ff; color: #004085;
+                                    {% else %}background-color: #fff3cd; color: #856404;{% endif %}">
+                                    {{ row.status_display|default:row.status|title }}
+                                </span>
 
-                    {% if row.is_order %}
-                        <span style="margin-left: 15px; color: #555; font-size: 14px;">
-                            👤 <strong>Buyer:</strong> {{ row.buyer_name }} ({{ row.buyer_email }})
-                        </span>
-                    {% endif %}
-                    
-                    <div style="float: right; display: flex; gap: 10px;">
-                        {% if row.is_order %}
-                            <form action="{% url 'item:order_refuse' row.order_id %}" method="post" style="margin: 0;">
-                                {% csrf_token %}
-                                <button type="submit" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;" onclick="return confirm('Refuse this sale?');">
-                                    Refuse
-                                </button>
-                            </form>
-                            <form action="{% url 'item:order_approve' row.order_id %}" method="post" style="margin: 0;">
-                                {% csrf_token %}
-                                <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                                    Confirm & Mark as Sold
-                                </button>
-                            </form>
-                        {% elif row.status == 'active' %}
-                            <form action="{% url 'item:item_mark_sold' row.item_id %}" method="post" style="margin: 0;">
-                                {% csrf_token %}
-                                <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                                    Manual Mark as Sold
-                                </button>
-                            </form>
-                        {% endif %}
-                    </div>
-                    <div style="clear: both;"></div>
-                </li>
+                                <div style="margin-top: 15px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; max-width: 500px;">
+                                    <h4 style="margin-top: 0; color: #495057; font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+                                        📦 Shipping & Contact Info
+                                    </h4>
+                                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: #555;">
+                                        <div>👤 <strong>Buyer:</strong> {{ row.buyer_name }}</div>
+                                        <div>📧 <strong>Email:</strong> <a href="mailto:{{ row.buyer_email }}" style="color: #007bff; text-decoration: none;">{{ row.buyer_email }}</a></div>
+                                        <div>📍 <strong>Address:</strong> {{ row.buyer_address|default:"Address not provided (Please contact buyer)" }}</div>
+                                        
+                                        <div style="margin-top: 10px;">
+                                            <a href="#" style="display: inline-block; background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; text-decoration: none; transition: background 0.2s;" onmouseover="this.style.background='#138496'" onmouseout="this.style.background='#17a2b8'">
+                                                💬 Message Buyer
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 10px; margin-left: 20px; min-width: 150px;">
+                                {% if row.status != 'completed' %}
+                                    <form action="{% url 'item:order_approve' row.order_id %}" method="post" style="margin: 0;">
+                                        {% csrf_token %}
+                                        <button type="submit" style="width: 100%; background-color: #28a745; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 5px rgba(40,167,69,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" onclick="return confirm('This will mark the order as fully completed. Proceed?');">
+                                            {% if row.status == 'paid' %}Ship Order{% else %}Finish Order{% endif %}
+                                        </button>
+                                    </form>
+                                    <form action="{% url 'item:order_refuse' row.order_id %}" method="post" style="margin: 0;">
+                                        {% csrf_token %}
+                                        <button type="submit" style="width: 100%; background-color: #fff; color: #dc3545; border: 1px solid #dc3545; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#dc3545'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#dc3545';" onclick="return confirm('Refuse this sale?');">
+                                            Refuse
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </li>
+                {% endif %}
             {% endfor %}
         </ul>
+
+        <h3 style="border-bottom: 2px solid #eee; padding-bottom: 10px; color: #2c3e50;">
+            📦 My Active Listings 
+            <span style="font-size: 14px; color: #7f8c8d; font-weight: normal; margin-left: 10px;">(Items currently for sale)</span>
+        </h3>
+        
+        <ul style="list-style-type: none; padding: 0;">
+            {% for row in display_items %}
+                {% if not row.is_order %}
+                    <li style="border: 1px solid #e0e0e0; padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; background-color: #fcfcfc; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='#fcfcfc'">
+                        
+                        <div>
+                            <strong>
+                                <a href="{% url 'item:item_detail' row.item_id %}" style="text-decoration: none; color: #333; font-size: 18px;">
+                                    {{ row.title }}
+                                </a>
+                            </strong> 
+                            <span style="color: #666; font-size: 16px; margin-left: 10px;">- £{{ row.price|floatformat:2 }}</span>
+                            
+                            <span style="margin-left: 10px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; background-color: #d4edda; color: #155724;">
+                                Active
+                            </span>
+                        </div>
+
+                        <div>
+                            <form action="{% url 'item:item_mark_sold' row.item_id %}" method="post" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" style="background-color: #6c757d; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#5a6268'" onmouseout="this.style.background='#6c757d'" onclick="return confirm('Manually delist this product?');">
+                                    Delist product
+                                </button>
+                            </form>
+                        </div>
+
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+
     {% else %}
-        <p>You haven't listed any items for sale yet.</p>
+        <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 12px; border: 1px dashed #ccc;">
+            <div style="font-size: 48px; margin-bottom: 20px;">🏪</div>
+            <h2 style="color: #333;">Your shop is empty</h2>
+            <p style="color: #666;">Start selling by adding your first item to the marketplace.</p>
+            <br>
+            <a href="{% url 'item:item_create' %}" class="btn-publish">+ Add Your First Item</a>
+        </div>
     {% endif %}
+
 </div>
 {% endblock %}

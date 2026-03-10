@@ -1,69 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Payment Failed (For temporary use only, it needs to be changed to the official version)</title>
+{% extends 'base.html' %}
+{% block title %}Payment Failed - UniTrade{% endblock %}
 
-    <style>
+{% block extra_css %}
+<style>
+    .status-card {
+        max-width: 450px;
+        margin: 80px auto;
+        background: #fff;
+        padding: 50px 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        text-align: center;
+        border-top: 5px solid #dc3545;
+    }
+    .icon-failed {
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+    .status-card h2 { color: #dc3545; margin-top: 0; }
+    .status-card p { color: #666; line-height: 1.6; margin-bottom: 30px; }
+    
+    .btn-retry {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 15px;
+        border-radius: 12px;
+        background: #f8f9fa;
+        color: #333;
+        font-weight: bold;
+        text-decoration: none;
+        border: 1px solid #ddd;
+        transition: all 0.2s;
+    }
+    .btn-retry:hover {
+        background: #e2e6ea;
+        border-color: #dae0e5;
+    }
+</style>
+{% endblock %}
 
-        body{
-            font-family: Arial, Helvetica, sans-serif;
-            background:#f5f6fa;
-            margin:0;
-            padding:0;
-        }
-
-        .container{
-            width:600px;
-            margin:100px auto;
-            background:white;
-            padding:40px;
-            border-radius:12px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.08);
-            text-align:center;
-        }
-
-        h2{
-            color:#dc3545;
-            margin-bottom:15px;
-        }
-
-        p{
-            font-size:16px;
-            color:#444;
-        }
-
-        .btn{
-            display:inline-block;
-            margin-top:30px;
-            padding:12px 25px;
-            background:#6c757d;
-            color:white;
-            text-decoration:none;
-            border-radius:8px;
-        }
-
-        .btn:hover{
-            background:#5a6268;
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<div class="container">
-
+{% block content %}
+<div class="status-card">
+    <div class="icon-failed">💳❌</div>
     <h2>Payment Failed</h2>
+    <p>{{ message }}<br>Something went wrong with the transaction. Please try again or use a different payment method.</p>
 
-    <p>{{ message }}</p>
-
-    <a class="btn" href="{% url 'order:order_list' %}">
-        Back to Orders
+    <a href="{% url 'order:order_list' %}" class="btn-retry">
+        Back to My Orders
     </a>
-
 </div>
-
-</body>
-</html>
+{% endblock %}
