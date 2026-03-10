@@ -24,9 +24,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-(qnk_v9u8h8@x5ou9ocmj!q&dwy*uc9z%4m36^1l)8-qeis2sz"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["8.208.127.158","www.unitrade.world","unitrade.world"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://unitrade.world",
+    "http://www.unitrade.world",
+    "https://unitrade.world",
+    "https://www.unitrade.world",
+]
 
 
 # Application definition
@@ -90,9 +97,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "default_db",
-        "USER": "default_user",
-        "PASSWORD": "",
+        "NAME": "unitrade_db_0",
+        "USER": "admin",
+        "PASSWORD": "admin",
         "HOST": "unidb.cbww2mgac5hy.eu-west-2.rds.amazonaws.com",
         "PORT": "3306",
     }
@@ -137,7 +144,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = "/var/www/UniTrade/static"
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -148,4 +159,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Media files (Images, Videos, etc.)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = "/var/www/UniTrade/media"
