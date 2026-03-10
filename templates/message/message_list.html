@@ -2,7 +2,6 @@
 {% block content %}
 
 <style>
-    /* 🚀 核心样式：给面包板套上苹果级的阳极氧化铝外壳 */
     .list-wrapper {
         max-width: 800px; 
         margin: 40px auto; 
@@ -35,8 +34,6 @@
         text-decoration: none;
         color: inherit;
     }
-    
-    /* 🚀 头像与在线状态指示灯 (整合式设计) */
     .avatar-wrapper {
         position: relative;
         margin-right: 18px;
@@ -63,11 +60,9 @@
         border-radius: 50%;
         border: 2px solid #fff;
     }
-    
-    /* 🚀 内容区与排版层级 */
     .conv-content {
         flex: 1;
-        min-width: 0; /* 必须加这个，否则文字截断会失效 */
+        min-width: 0;
     }
     .conv-header {
         display: flex;
@@ -103,7 +98,6 @@
         text-overflow: ellipsis;
     }
     
-    /* 🚀 右侧信息区 */
     .conv-meta {
         text-align: right;
         display: flex;

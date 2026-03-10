@@ -10,4 +10,5 @@ urlpatterns = [
     path('send/', views.message_send, name='message_send'),
     path('fetch/', views.message_fetch, name='message_fetch'),
     path('notification/', views.message_notification, name='message_notification'),
+    path('api/unread-count/', views.api_unread_count, name='api_unread_count'),
 ]

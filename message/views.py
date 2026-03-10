@@ -279,3 +279,15 @@ def message_notification_read(request, notification_id):
         return redirect('order:order_detail', order_id=notification.order.id)
 
     return redirect('message_notification')
+
+# AJAX API for fetching unread message count | 获取未读消息数量的 AJAX API
+@login_required
+def api_unread_count(request):
+    if request.user.is_authenticated:
+        count = Message.objects.filter(
+            Q(conversation__buyer=request.user) | Q(conversation__seller=request.user),
+            is_read=False
+        ).exclude(sender=request.user).count()
+        return JsonResponse({'unread_count': count})
+    
+    return JsonResponse({'unread_count': 0})

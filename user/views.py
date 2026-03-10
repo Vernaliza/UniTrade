@@ -98,3 +98,31 @@ def dashboard_redirect(request):
     else:
         # Students browse the marketplace
         return redirect('item:item_list')
+    
+@login_required
+def profile_view(request):
+    # for display user info
+    return render(request, 'user/profile.html', {'user': request.user})
+
+@login_required
+def profile_edit(request):
+    if request.method == 'POST':
+        # recive new data from form
+        new_email = request.POST.get('email')
+        new_address = request.POST.get('address')
+
+        # update user email in django's built-in User model
+        user = request.user
+        user.email = new_email
+        user.save()
+
+        # update user address in Profile model
+        if hasattr(user, 'profile'):
+            user.profile.address = new_address
+            user.profile.save()
+
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('user:profile')
+
+    # if GET request, show the edit form with current user info
+    return render(request, 'user/profile_edit.html', {'user': request.user})

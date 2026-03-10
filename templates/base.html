@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <title>{% block title %}UniTrade - Better Marketplace{% endblock %}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'favicon/android-chrome-192x192.png' %}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'favicon/android-chrome-512x512.png' %}">
 
     <style>
         /* body */
@@ -139,7 +145,12 @@
 <body>
     <header>
         <nav>
-            <a href="{% url 'item:item_list' %}" class="logo">UniTrade</a>
+            <a href="{% url 'item:item_list' %}" style="text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                <img src="{% static 'favicon/android-chrome-192x192.png' %}" alt="UniTrade Logo" style="height: 38px; width: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <span style="font-size: 16px; font-weight: 800; font-family: 'Segoe UI', Roboto, sans-serif; letter-spacing: -0.5px; color: #333; margin-top: 5px;">
+                    Trade
+                </span>
+            </a>
             
 <div class="search-bar">
                 <form action="{% url 'item:item_search' %}" method="GET">
@@ -155,7 +166,10 @@
 
             <div class="nav-links">
                 {% if user.is_authenticated %}
-                    <span style="color: #666; margin-right: 10px;">Hi, {{ user.username }}</span>
+                    <a href="{% url 'user:profile' %}" style="text-decoration: none; color: #333; font-weight: bold; display: flex; align-items: center; gap: 5px; margin-right: 15px;">
+                        <i class="bi bi-person-circle" style="font-size: 1.2rem; color: #007bff;"></i>
+                        Hi, {{ user.username }}
+                    </a>
                     
                     {% if user.is_staff %}
                         <a href="{% url 'administrator:dashboard' %}" class="btn-publish" style="background-color: #dc3545;">Admin Panel</a>
@@ -164,12 +178,24 @@
                     {% if user.profile.role == 'merchant' %}
                         <a href="{% url 'item:item_create' %}" class="btn-publish">+ Add New Item</a>
                         <a href="{% url 'item:my_item' %}">My Shop</a>
-                        <a href="{% url 'message:message_list' %}">Messages</a>
+                        <a href="{% url 'message:message_list' %}" style="position: relative; display: inline-block; text-decoration: none; color: #333; font-weight: bold; margin-right: 0ch;">
+                            Messages
+                            
+                            <span id="global-unread-badge" style="position: absolute; top: -8px; right: -12px; background-color: #ff3b30; color: white; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 12px; line-height: 1; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(255, 59, 48, 0.3); display: {% if unread_count > 0 %}inline-block{% else %}none{% endif %};">
+                                {{ unread_count }}
+                            </span>
+                        </a>
                     {% else %}
                         <a href="{% url 'item:item_list' %}" style="text-decoration: none; color: #333; font-weight: bold;">Browse Items</a>
                         <a href="/orderbasket/" style="text-decoration: none; color: #333; font-weight: bold;">Basket</a>
                         <a href="/order" style="text-decoration: none; color: #333; font-weight: bold;">My Orders</a>
-                        <a href="{% url 'message:message_list' %}">Messages</a>
+                        <a href="{% url 'message:message_list' %}" style="position: relative; display: inline-block; text-decoration: none; color: #333; font-weight: bold; margin-right: 0px;">
+                            Messages
+                            
+                            <span id="global-unread-badge" style="position: absolute; top: -8px; right: -12px; background-color: #ff3b30; color: white; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 12px; line-height: 1; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(255, 59, 48, 0.3); display: {% if unread_count > 0 %}inline-block{% else %}none{% endif %};">
+                                {{ unread_count }}
+                            </span>
+                        </a>
                     {% endif %}
                     
                     <a href="{% url 'user:user_logout' %}">Logout</a>
@@ -282,6 +308,43 @@
             }
         });
     </script>
+    {% if user.is_authenticated %}
+        <script>
+            function checkUnreadMessages() {
+                fetch('/message/api/unread-count/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const badge = document.getElementById('global-unread-badge');
+                        if (badge) {
+                            if (data.unread_count > 0) {
+                                badge.innerText = data.unread_count;
+                                badge.style.display = 'inline-block'; // 显示红点
+                            } else {
+                                badge.style.display = 'none'; // 隐藏红点
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Radar Error:', error));
+            }
+            setInterval(checkUnreadMessages, 5000);
+            window.addEventListener('pageshow', function(event) {
+                // stop bfcache and hard disk cache
+                if (event.persisted) {
+                    window.location.reload();
+                    return;
+                }
+                
+                let perfEntries = performance.getEntriesByType("navigation");
+                if (perfEntries.length > 0) {
+                    let navType = perfEntries[0].type;
+                    // refresh if it's back_forward
+                    if (navType === "back_forward") {
+                        window.location.reload();
+                    }
+                }
+            });
+        </script>
+    {% endif %}
 </body>
 </html>
 </body>

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile - UniTrade{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 50px auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eaeaea;">
+    
+    <h2 style="margin-top: 0; margin-bottom: 30px; color: #333; text-align: center;">Edit Profile</h2>
+
+    <form method="POST" action="{% url 'user:profile_edit' %}">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; color: #666; font-weight: bold; margin-bottom: 8px;">Username</label>
+            <input type="text" value="{{ user.username }}" disabled style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: #f9f9f9; color: #999; cursor: not-allowed; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; color: #333; font-weight: bold; margin-bottom: 8px;">Email Address</label>
+            <input type="email" name="email" value="{{ user.email }}" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px;">
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <label style="display: block; color: #333; font-weight: bold; margin-bottom: 8px;">Delivery Address</label>
+            <textarea name="address" rows="3" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; font-family: inherit;">{{ user.profile.address }}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <button type="submit" style="flex: 1; background: #28a745; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;">
+                Save Changes
+            </button>
+            <a href="{% url 'user:profile' %}" style="flex: 1; text-align: center; background: #e9ecef; color: #495057; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; line-height: 1.2;">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

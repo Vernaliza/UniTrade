@@ -24,9 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-(qnk_v9u8h8@x5ou9ocmj!q&dwy*uc9z%4m36^1l)8-qeis2sz"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+#DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["8.208.127.158","www.unitrade.world","unitrade.world"]
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']
+#ALLOWED_HOSTS = ["8.208.127.158","www.unitrade.world","unitrade.world"]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://unitrade.world",
@@ -77,6 +79,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                'message.context_processors.unread_messages',
             ],
         },
     },
