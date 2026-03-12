@@ -152,7 +152,8 @@
                 </span>
             </a>
             
-<div class="search-bar">
+            {% block nav_search %}
+            <div class="search-bar">
                 <form action="{% url 'item:item_search' %}" method="GET">
                     <input type="text" id="live-search-input" name="q" placeholder="Search items (e.g. Textbooks)..." aria-label="Search items" autocomplete="off">
                     
@@ -163,6 +164,7 @@
                 
                 <div id="search-results-dropdown" class="search-dropdown"></div>
             </div>
+            {% endblock %}
 
             <div class="nav-links">
                 {% if user.is_authenticated %}

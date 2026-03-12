@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% block nav_search %}
+{% endblock %}
 {% block title %}Welcome to UniTrade{% endblock %}
 
 {% block content %}
@@ -64,7 +66,7 @@
     <p class="hero-subtitle">Buy, sell, and connect exclusively with verified students.</p>
     
     <form action="{% url 'item:item_list' %}" method="GET" class="hero-search-form">
-        <input type="text" name="q" class="hero-search-input" placeholder="What are you looking for today? (e.g. Textbooks, Monitor)">
+        <input type="text" name="q" class="hero-search-input" autocomplete="offfff" placeholder="What are you looking for today? (e.g. Textbooks, Monitor)">
         <button type="submit" class="hero-search-btn">Search</button>
     </form>
 </div>
