@@ -138,7 +138,7 @@
         <h1 class="hero-title">Unitrade</h1>
         <p class="hero-subtitle">Buy, sell, and connect exclusively with verified students.</p>
         
-        <form action="{% url 'item:item_list' %}" method="GET" class="hero-search-form">
+        <form action="{% url 'item:item_search' %}" method="GET" class="hero-search-form">
             <input type="text" name="q" id="hero-search-input" class="hero-search-input" autocomplete="new-password" placeholder="What are you looking for today? (e.g. Textbooks, Monitor)">
             <button type="submit" class="hero-search-btn">Search</button>
             
@@ -182,12 +182,12 @@
     </a>
 </div>
 
-<style>
+<!-- <style>
     a[href="{% url 'item:item_list' %}"]:hover {
         background-color: #d86800 !important;
         color: white !important;
     }
-</style>
+</style> -->
 
 <div class="items-grid">
     {% if latest_items %}
