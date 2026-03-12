@@ -25,10 +25,26 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from item.models import Item
+import os
 
 def index(request):
-    latest_items = Item.objects.all().order_by('-id')[:4]
-    return render(request, 'index.html', {'latest_items': latest_items})
+    latest_items = Item.objects.filter(status=Item.Status.ACTIVE).order_by("-created_at")[:4]
+    # banner images
+    banner_images = []
+    images_dir = os.path.join(settings.BASE_DIR, 'static', 'images')
+    
+    if os.path.exists(images_dir):
+        for filename in os.listdir(images_dir):
+            if filename.startswith('banner') and filename.endswith(('.jpg', '.jpeg', '.png')):
+                banner_images.append(f'images/{filename}')
+    # sort
+    banner_images.sort()
+    context = {
+        'latest_items': latest_items,
+        'banner_images': banner_images,
+    }
+    # return render(request, 'index.html', {'latest_items': latest_items})context
+    return render(request, 'index.html', context)
 
 urlpatterns = [
     path("admin/", admin.site.urls),

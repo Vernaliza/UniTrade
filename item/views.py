@@ -47,7 +47,7 @@ def item(request, item_id):
         "liked_ids": liked_ids,
     })
 
-@login_required
+@login_required(login_url='/user/login/')
 def item_create(request):
     if request.method == "POST":
         form = ItemForm(request.POST, request.FILES)
@@ -71,7 +71,7 @@ def item_create(request):
     return render(request, "item/item_form.html", {"form": form})
 
 
-@login_required
+@login_required(login_url='/user/login/')
 def item_publish(request, item_id):
     obj = get_object_or_404(Item, pk=item_id, seller=request.user)
     #allow republish from delisted/hidden to active
@@ -80,7 +80,7 @@ def item_publish(request, item_id):
     return redirect("item_detail", item_id=obj.id)
 
 
-@login_required
+@login_required(login_url='/user/login/')
 def item_edit(request, item_id):
     obj = get_object_or_404(Item, pk=item_id, seller=request.user)
     if request.method == "POST":
@@ -93,7 +93,7 @@ def item_edit(request, item_id):
     return render(request, "item/item_form.html", {"form": form, "item": obj})
 
 
-@login_required
+@login_required(login_url='/user/login/')
 def item_delete(request, item_id):
     obj = get_object_or_404(Item, pk=item_id, seller=request.user)
     if request.method == "POST":
@@ -209,7 +209,7 @@ def item_search(request):
     # })
 
 
-# @login_required
+# @login_required(login_url='/user/login/')
 # def my_item(request):
 #     from order.models import Order
 #     display_items = []
@@ -247,7 +247,7 @@ def item_search(request):
             
 #     return render(request, "item/my_item.html", {"display_items": display_items})
 
-@login_required
+@login_required(login_url='/user/login/')
 def my_item(request):
     from order.models import Order
     display_items = []
@@ -295,7 +295,7 @@ def my_item(request):
             
     return render(request, "item/my_item.html", {"display_items": display_items})
 
-@login_required
+@login_required(login_url='/user/login/')
 def item_mark_sold(request, item_id):
     # Manual sold button for Active items
     obj = get_object_or_404(Item, pk=item_id, seller=request.user)
@@ -307,7 +307,7 @@ def item_mark_sold(request, item_id):
     return redirect("item:my_item")
 
 # Fixed 
-@login_required
+@login_required(login_url='/user/login/')
 def order_approve(request, order_id):
     from order.models import Order
     order = get_object_or_404(Order, pk=order_id, seller=request.user)
@@ -325,7 +325,7 @@ def order_approve(request, order_id):
         
     return redirect("item:my_item")
 
-# @login_required
+# @login_required(login_url='/user/login/')
 # def order_approve(request, order_id):
 #     from order.models import Order
 #     order = get_object_or_404(Order, pk=order_id, seller=request.user)
@@ -352,7 +352,7 @@ def order_approve(request, order_id):
 #         messages.success(request, f'One unit of {item.title} approved!')
 #     return redirect("item:my_item")
 
-@login_required
+@login_required(login_url='/user/login/')
 def order_refuse(request, order_id):
     from order.models import Order
     order = get_object_or_404(Order, pk=order_id, seller=request.user)

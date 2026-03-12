@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block nav_search %}
 {% endblock %}
 {% block title %}Welcome to UniTrade{% endblock %}
@@ -20,7 +21,68 @@
     .hero-search-input { flex: 1; padding: 15px; border-radius: 8px; border: none; font-size: 16px; }
     .hero-search-btn { padding: 15px 30px; border-radius: 8px; border: none; background-color: #ffb81c; color: #003865; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 16px; }
     .hero-search-btn:hover { background-color: #e5a519; }
-
+    .hero-carousel-container {
+        position: relative;
+        width: 100%;
+        height: 350px;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .carousel-slide {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-size: cover; background-position: center;
+        opacity: 0; transition: opacity 1s ease-in-out;
+    }
+    .carousel-slide.active { opacity: 1; }
+    /* .hero-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 56, 101, 0.7);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;
+        padding: 0 20px; text-align: center;
+    }
+    .hero-title { font-size: 2.5rem; font-weight: bold; margin-bottom: 10px; color: white; }
+    .hero-subtitle { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; color: white; } */
+    .hero-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.35); 
+        display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;
+        padding: 0 20px; text-align: center;
+    }
+    
+    .hero-title { 
+        font-size: 2.8rem; font-weight: 800; margin-bottom: 10px; color: rgb(255, 133, 57); 
+        text-shadow: 0 2px 10px rgba(0,0,0,0.5), 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    .hero-subtitle { 
+        font-size: 1.2rem; margin-bottom: 30px; color: white; font-weight: 500;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    
+    .hero-search-form { width: 100%; max-width: 600px; display: flex; position: relative; } /* add position: relative */
+    .hero-search-input { flex: 1; padding: 15px; border-radius: 8px 0 0 8px; border: none; font-size: 16px; outline: none; }
+    .hero-search-btn { padding: 15px 30px; border-radius: 0 8px 8px 0; border: none; background-color: rgb(255, 133, 57); color: #653d00; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 16px; } /*back ffb81c*/
+    .hero-search-btn:hover { background-color: rgba(224, 117, 51, 0.9); } /*back e5a519*/
+    #hero-search-dropdown {
+        /* display: none; position: absolute; top: 100%; left: 0; width: calc(100% - 110px);
+        /* background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); */
+        /* margin-top: 5px; max-height: 300px; overflow-y: auto; z-index: 1000; text-align: left; */
+        display: none; 
+        position: absolute; 
+        top: calc(100% + 5px);
+        left: 0; 
+        width: 100%;
+        background: white; 
+        border: 1px solid #ccc;
+        border-radius: 8px; 
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        max-height: 350px; 
+        overflow-y: auto; 
+        z-index: 1000; 
+        text-align: left;
+    }
     .action-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -46,7 +108,7 @@
     .action-title { font-weight: bold; font-size: 1.1rem; }
     .action-desc { font-size: 0.9rem; color: #777; }
 
-    .section-title { font-size: 1.8rem; font-weight: bold; color: #333; margin-bottom: 25px; border-left: 5px solid #003865; padding-left: 15px; }
+    .section-title { font-size: 1.8rem; font-weight: bold; color: #333; margin-bottom: 25px; border-left: 5px solid #d86800; padding-left: 15px; }
     
     .items-grid {
         display: grid;
@@ -61,14 +123,28 @@
     .item-price { color: #dc3545; font-weight: bold; font-size: 1.2rem; }
 </style>
 
-<div class="hero-section">
-    <h1 class="hero-title">Unitrade</h1>
-    <p class="hero-subtitle">Buy, sell, and connect exclusively with verified students.</p>
-    
-    <form action="{% url 'item:item_list' %}" method="GET" class="hero-search-form">
-        <input type="text" name="q" class="hero-search-input" autocomplete="offfff" placeholder="What are you looking for today? (e.g. Textbooks, Monitor)">
-        <button type="submit" class="hero-search-btn">Search</button>
-    </form>
+<div class="hero-carousel-container">
+    {% if banner_images %}
+        {% for banner in banner_images %}
+            <div class="carousel-slide {% if forloop.first %}active{% endif %}" 
+                 style="background-image: url('{% static banner %}'); background-size: cover; background-position: center;">
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="carousel-slide active" style="background-color: #003865;"></div>
+    {% endif %}
+
+    <div class="hero-overlay">
+        <h1 class="hero-title">Unitrade</h1>
+        <p class="hero-subtitle">Buy, sell, and connect exclusively with verified students.</p>
+        
+        <form action="{% url 'item:item_list' %}" method="GET" class="hero-search-form">
+            <input type="text" name="q" id="hero-search-input" class="hero-search-input" autocomplete="new-password" placeholder="What are you looking for today? (e.g. Textbooks, Monitor)">
+            <button type="submit" class="hero-search-btn">Search</button>
+            
+            <div id="hero-search-dropdown"></div>
+        </form>
+    </div>
 </div>
 
 <div class="action-grid">
@@ -78,13 +154,13 @@
         <div class="action-desc">Find great deals from fellow students.</div>
     </a>
     
-    <a href="#" class="action-card">
+    <a href="{% url 'item:item_create' %}" class="action-card">
         <div class="action-icon">💰</div>
         <div class="action-title">Sell an Item</div>
         <div class="action-desc">Turn your old stuff into quick cash.</div>
     </a>
     
-    <a href="#" class="action-card">
+    <a href="{% url 'message:message_list' %}" class="action-card">
         <div class="action-icon">💬</div>
         <div class="action-title">My Messages</div>
         <div class="action-desc">Chat with buyers and sellers.</div>
@@ -97,12 +173,32 @@
     </a>
 </div>
 
-<h2 class="section-title">Fresh on Campus</h2>
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px;">
+    <h2 class="section-title" style="margin-bottom: 0;">Fresh on Campus</h2>
+    <a href="{% url 'item:item_list' %}" style="text-decoration: none; color: #d86800; font-weight: bold; font-size: 20px; padding: 6px 15px; border-radius: 20px; background-color: #f8f3f0; transition: all 0.2s ease;">
+        View More >
+    </a>
+</div>
+
+<style>
+    a[href="{% url 'item:item_list' %}"]:hover {
+        background-color: #d86800 !important;
+        color: white !important;
+    }
+</style>
+
 <div class="items-grid">
     {% if latest_items %}
         {% for item in latest_items %}
-        <a href="#" class="item-card">
-            <div class="item-image">📸</div>
+        <a href="{% url 'item:item_detail' item.id %}" class="item-card">
+            
+            <div class="item-image" style="width: 100%; height: 180px; overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #f4f4f4;">
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <span style="color: #bbb; font-size: 2rem;">📸</span>
+                {% endif %}
+            </div>
             <div class="item-info">
                 <h3 class="item-title">{{ item.title }}</h3>
                 <div class="item-price">£{{ item.price }}</div>
@@ -113,5 +209,19 @@
         <p style="color: #777; font-style: italic;">No items listed yet. Be the first to sell something!</p>
     {% endif %}
 </div>
+
+<script>    // hero-carousel-container pic js
+    document.addEventListener('DOMContentLoaded', function() {
+        let slides = document.querySelectorAll('.carousel-slide');
+        if (slides.length > 0) {
+            let currentSlide = 0;
+            setInterval(() => {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }, 5000);
+        }
+    });
+</script>
 
 {% endblock %}

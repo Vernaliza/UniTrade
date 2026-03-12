@@ -16,7 +16,7 @@ from message.models import Notification
 
 
 #create a new order here | 在这里创建订单
-@login_required
+@login_required(login_url='/user/login/')
 @transaction.atomic
 def order_create(request):
     if request.method == 'POST':
@@ -90,7 +90,7 @@ def _is_ajax(request):
 #只有订单参与者（买家 customer 或 卖家 seller）可以取消订单
 #只有状态为 pending 或 paid 时才允许取消
 #取消后如商品状态为 sold，则恢复为 active
-@login_required
+@login_required(login_url='/user/login/')
 def order_cancel(request, order_id):
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
@@ -144,7 +144,7 @@ def order_cancel(request, order_id):
 
 
 #update order status | 修改订单状态
-@login_required
+@login_required(login_url='/user/login/')
 def order_status(request, order_id):
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
@@ -198,7 +198,7 @@ def order_status(request, order_id):
 
 
 #delete order | 删除订单
-@login_required
+@login_required(login_url='/user/login/')
 def order_delete(request, order_id):
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
@@ -224,7 +224,7 @@ def order_delete(request, order_id):
 
 
 #obtain all orders from both customers and sellers of the user | 获取用户买卖双方的所有订单
-@login_required
+@login_required(login_url='/user/login/')
 def order_list(request):
     orders = Order.objects.filter(
         Q(customer=request.user) | Q(seller=request.user)
@@ -236,7 +236,7 @@ def order_list(request):
 
 
 #search order | 搜索订单
-@login_required
+@login_required(login_url='/user/login/')
 def order_search(request):
     q = (request.GET.get("q") or "").strip()
     status = (request.GET.get("status") or "").strip().lower()
@@ -285,7 +285,7 @@ def order_search(request):
 
 
 #view order details here | 在这里查看订单详情
-@login_required
+@login_required(login_url='/user/login/')
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
 
@@ -311,7 +311,7 @@ def _get_or_create_basket(user) -> Basket:
 
 
 #view basket details here | 在这里查看购物车详情
-@login_required
+@login_required(login_url='/user/login/')
 def basket_detail(request):
     basket = _get_or_create_basket(request.user)
     items = basket.items.select_related("item")
@@ -323,7 +323,7 @@ def basket_detail(request):
 
 
 #add to the basket | 加入购物车
-@login_required
+@login_required(login_url='/user/login/')
 @transaction.atomic
 def basket_add(request):
     if request.method != "POST":
@@ -363,7 +363,7 @@ def basket_add(request):
 
 
 #modify quantity | 修改数量
-@login_required
+@login_required(login_url='/user/login/')
 @transaction.atomic
 def basket_update_quantity(request):
     if request.method != "POST":
@@ -385,7 +385,7 @@ def basket_update_quantity(request):
 
 
 #remove item | 移除商品
-@login_required
+@login_required(login_url='/user/login/')
 @transaction.atomic
 def basket_remove(request):
     if request.method != "POST":
@@ -403,7 +403,7 @@ def _new_order_id():
     return uuid.uuid4().hex[:20].upper()
 
 #checkout, turn the status of order to "pending", turn the status of item to "sold" | 结算
-@login_required
+@login_required(login_url='/user/login/')
 @transaction.atomic
 def basket_checkout(request):
     if request.method != "POST":

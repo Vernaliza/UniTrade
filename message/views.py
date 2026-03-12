@@ -46,7 +46,7 @@ def get_last_seen_display(user):
 
 
 #watch message list | 查看消息列表
-@login_required
+@login_required(login_url='/user/login/')
 def message_list(request):
     conversations = Conversation.objects.filter(
         Q(buyer=request.user) | Q(seller=request.user)
@@ -79,7 +79,7 @@ def message_list(request):
 
 
 #display the chat details page of a specific conversation | 显示某一个具体会话的聊天详情页
-@login_required
+@login_required(login_url='/user/login/')
 def message_detail(request):
     conversation_id = request.GET.get('conversation_id')
     if not conversation_id:
@@ -123,7 +123,7 @@ def message_detail(request):
     })
 
 #initiate a chat from the product page | 从商品页面发起聊天
-@login_required
+@login_required(login_url='/user/login/')
 def message_start(request):
     item_id = request.GET.get('item_id')
     if not item_id:
@@ -144,7 +144,7 @@ def message_start(request):
     return redirect(f'/message/detail/?conversation_id={conversation.id}')
 
 
-@login_required
+@login_required(login_url='/user/login/')
 def message_send(request):
     if request.method != 'POST':
         return redirect('/message/list/')
@@ -196,7 +196,7 @@ def message_send(request):
     return redirect(f'/message/detail/?conversation_id={conversation.id}')
 
 #fetch new message | 拉取新消息
-@login_required
+@login_required(login_url='/user/login/')
 def message_fetch(request):
     conversation_id = request.GET.get('conversation_id')
     last_message_id = request.GET.get('last_message_id')
@@ -249,7 +249,7 @@ def message_fetch(request):
 
 
 #show notification list | 显示当前用户的消息通知列表
-@login_required
+@login_required(login_url='/user/login/')
 def message_notification(request):
     notifications = Notification.objects.filter(
         user=request.user
@@ -266,7 +266,7 @@ def message_notification(request):
 
 
 #when clicking on a notification, mark it as read and redirect it to the corresponding chat page | 点开某一条通知时，把它标记为已读，并跳转到对应聊天页
-@login_required
+@login_required(login_url='/user/login/')
 def message_notification_read(request, notification_id):
     notification = get_object_or_404(Notification, id=notification_id, user=request.user)
     notification.is_read = True
@@ -281,7 +281,7 @@ def message_notification_read(request, notification_id):
     return redirect('message_notification')
 
 # AJAX API for fetching unread message count | 获取未读消息数量的 AJAX API
-@login_required
+@login_required(login_url='/user/login/')
 def api_unread_count(request):
     if request.user.is_authenticated:
         count = Message.objects.filter(

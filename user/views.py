@@ -99,12 +99,12 @@ def dashboard_redirect(request):
         # Students browse the marketplace
         return redirect('item:item_list')
     
-@login_required
+@login_required(login_url='/user/login/')
 def profile_view(request):
     # for display user info
     return render(request, 'user/profile.html', {'user': request.user})
 
-@login_required
+@login_required(login_url='/user/login/')
 def profile_edit(request):
     if request.method == 'POST':
         # recive new data from form
