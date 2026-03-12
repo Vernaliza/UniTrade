@@ -27,14 +27,15 @@ SECRET_KEY = "django-insecure-(qnk_v9u8h8@x5ou9ocmj!q&dwy*uc9z%4m36^1l)8-qeis2sz
 #DEBUG = False
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']
-#ALLOWED_HOSTS = ["8.208.127.158","www.unitrade.world","unitrade.world"]
+ALLOWED_HOSTS = ["webtest.bearland.online","101.126.137.137","8.208.127.158","www.unitrade.world","unitrade.world",'*', 'localhost', '127.0.0.1']
 
 CSRF_TRUSTED_ORIGINS = [
     "http://unitrade.world",
     "http://www.unitrade.world",
     "https://unitrade.world",
     "https://www.unitrade.world",
+    "http://webtest.bearland.online",
+    "https://webtest.bearland.online"
 ]
 
 
