@@ -97,9 +97,9 @@ def item_edit(request, item_id):
 def item_delete(request, item_id):
     obj = get_object_or_404(Item, pk=item_id, seller=request.user)
     if request.method == "POST":
-        obj.status = Item.Status.DELETED
-        obj.save(update_fields=["status", "updated_at"])
-        return redirect("my_item")
+        obj.delete()  # This completely removes it from the database!
+        messages.success(request, 'Item successfully deleted.')
+        return redirect("item:my_item")
     return render(request, "item/item_confirm_delete.html", {"item": obj})
 
 

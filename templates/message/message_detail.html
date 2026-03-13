@@ -8,29 +8,19 @@
     .chat-box { flex: 1; padding: 20px; overflow-y: auto; background: #fcfcfc; display: flex; flex-direction: column; gap: 15px; }
     
     /* 气泡样式 */
-    .msg { 
-    max-width: 70%; 
-    padding: 10px 15px; 
-    border-radius: 15px; 
-    font-size: 15px; 
-    position: relative; 
-    /* word-break: break-all;      兼容旧浏览器的换行方式 */
-    /* overflow-wrap: break-word;  现代浏览器的换行标准 */
-    /* white-space: pre-wrap;      保留空格和换行 */
-}
-    .msg.mine { 
-        align-self: flex-end; 
-        background: #d86800; 
-        color: white; 
-        border-bottom-right-radius: 2px; 
-        text-align: right;
-    }
-    .msg.theirs { 
-        align-self: flex-start; 
-        background: #e9ecef; 
-        color: #333; 
-        border-bottom-left-radius: 2px; 
-    }
+/* 气泡样式 (Bubble Styles) */
+    .msg-row { display: flex; align-items: flex-end; gap: 10px; max-width: 85%; margin-bottom: 10px; }
+    .msg-row.mine { align-self: flex-end; justify-content: flex-end; }
+    .msg-row.theirs { align-self: flex-start; justify-content: flex-start; }
+    
+    .msg-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid #ccc; }
+    .msg-avatar-fallback { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; flex-shrink: 0; }
+    .mine .msg-avatar-fallback { background: #d86800; }
+    .theirs .msg-avatar-fallback { background: #6c757d; }
+
+    .msg { padding: 10px 15px; border-radius: 15px; font-size: 15px; position: relative; }
+    .msg.mine { background: #d86800; color: white; border-bottom-right-radius: 2px; text-align: left; }
+    .msg.theirs { background: #e9ecef; color: #333; border-bottom-left-radius: 2px; }
     .msg-time { font-size: 11px; margin-top: 5px; opacity: 0.7; text-align: right; }
 
     .chat-input-area { padding: 20px; border-top: 1px solid #eee; display: flex; gap: 10px; }
@@ -39,31 +29,74 @@
 </style>
 
 <div class="chat-wrapper">
-    <div class="chat-header">
+<div class="chat-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; background: #f8f9fa; border-radius: 12px 12px 0 0; margin-bottom: 20px;">
+    
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <a href="{% url 'message:message_list' %}" style="text-decoration: none; color: #d86800; font-weight: bold; font-size: 14px;">&larr; Back</a>
+        
+        {% if other_user.profile.avatar %}
+            <img src="{{ other_user.profile.avatar.url }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;">
+        {% else %}
+            <div style="width: 45px; height: 45px; border-radius: 50%; background: #d86800; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px;">
+                {{ other_user.username|first|upper }}
+            </div>
+        {% endif %}
+        
         <div class="other-user-info">
-            <h3>{{ other_user.username }}</h3>
-            <span id="status-dot" class="status-dot" style="background: {% if other_user_online %}#28a745{% else %}#ccc{% endif %};"></span>            <small id="user-status">{{ other_user_status }}</small>
-        </div>
-        <div class="item-snapshot">
-            <a href="{% url 'item:item_detail' conversation.item.id %}" style="text-decoration: none; color: #666; font-size: 13px;">
-                📦 {{ conversation.item.title|truncatechars:20 }}
-            </a>
+            <h3 style="margin: 0; font-size: 18px;">{{ other_user.username }}</h3>
+            <span id="status-dot" class="status-dot" style="background: {% if other_user_online %}#28a745{% else %}#ccc{% endif %}; width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>
+            <small id="user-status" style="font-size: 12px; color: #666;">{{ other_user_status }}</small>
         </div>
     </div>
 
-    <div class="chat-box" id="chat-box">
-        {% for msg in chat_messages %}
-            <div class="msg {% if msg.sender == request.user %}mine{% else %}theirs{% endif %}" data-id="{{ msg.id }}">
-                <div class="msg-text">
-                    {% if msg.text %}
-                        <div style="margin-bottom: 4px; white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word;">{{ msg.text }}</div>
-                    {% endif %}
-                    
-                    {% if msg.image %}
-                        <img src="{{ msg.image.url }}" alt="Image" style="max-width: 100%; border-radius: 8px; margin-top: 5px;">
-                    {% endif %}
+    {% if conversation.item %}
+    <div class="item-snapshot">
+        <a href="{% url 'item:item_detail' conversation.item.id %}" style="text-decoration: none; color: inherit;">
+            <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 8px 15px; border-radius: 8px; border: 1px solid #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                {% if conversation.item.image %}
+                    <img src="{{ conversation.item.image.url }}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;">
+                {% endif %}
+                <div>
+                    <div style="font-weight: bold; font-size: 14px;">{{ conversation.item.title|truncatechars:20 }}</div>
+                    <div style="color: #d9534f; font-weight: bold; font-size: 13px;">£{{ conversation.item.price }}</div>
                 </div>
-                <div class="msg-time">{{ msg.created_at|date:"Y-m-d H:i:s" }}</div>
+            </div>
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="chat-box" id="chat-box">
+        {% for msg in chat_messages %}
+            <div class="msg-row {% if msg.sender == request.user %}mine{% else %}theirs{% endif %}" data-id="{{ msg.id }}">
+                
+                {% if msg.sender != request.user %}
+                    {% if other_user.profile.avatar %}
+                        <img src="{{ other_user.profile.avatar.url }}" class="msg-avatar">
+                    {% else %}
+                        <div class="msg-avatar-fallback">{{ other_user.username|first|upper }}</div>
+                    {% endif %}
+                {% endif %}
+
+                <div class="msg {% if msg.sender == request.user %}mine{% else %}theirs{% endif %}">
+                    <div class="msg-text">
+                        {% if msg.text %}
+                            <div style="margin-bottom: 4px; white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word;">{{ msg.text }}</div>
+                        {% endif %}
+                        {% if msg.image %}
+                            <img src="{{ msg.image.url }}" alt="Image" style="max-width: 100%; border-radius: 8px; margin-top: 5px;">
+                        {% endif %}
+                    </div>
+                    <div class="msg-time">{{ msg.created_at|date:"Y-m-d H:i:s" }}</div>
+                </div>
+
+                {% if msg.sender == request.user %}
+                    {% if request.user.profile.avatar %}
+                        <img src="{{ request.user.profile.avatar.url }}" class="msg-avatar">
+                    {% else %}
+                        <div class="msg-avatar-fallback">{{ request.user.username|first|upper }}</div>
+                    {% endif %}
+                {% endif %}
             </div>
         {% endfor %}
     </div>
@@ -107,18 +140,27 @@
         const response = await fetch(url);
         const data = await response.json();
 
-        if (data.chat_messages && data.chat_messages.length > 0) {
+    if (data.chat_messages && data.chat_messages.length > 0) {
+            
+            // HTML chunks for the Javascript to inject
+            const myAvatarHtml = `{% if request.user.profile.avatar %}<img src="{{ request.user.profile.avatar.url }}" class="msg-avatar">{% else %}<div class="msg-avatar-fallback">{{ request.user.username|first|upper }}</div>{% endif %}`;
+            const theirAvatarHtml = `{% if other_user.profile.avatar %}<img src="{{ other_user.profile.avatar.url }}" class="msg-avatar">{% else %}<div class="msg-avatar-fallback">{{ other_user.username|first|upper }}</div>{% endif %}`;
+
             data.chat_messages.forEach(msg => {
                 if (document.querySelector(`[data-id="${msg.id}"]`)) return;
                 const div = document.createElement('div');
-                div.className = `msg ${msg.is_mine ? 'mine' : 'theirs'}`;
+                div.className = `msg-row ${msg.is_mine ? 'mine' : 'theirs'}`;
                 div.dataset.id = msg.id;
                 div.innerHTML = `
-                    <div class="msg-text">
-                        ${msg.text ? '<div style="margin-bottom: 4px; white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word;">' + msg.text + '</div>' : ''}
-                        ${msg.image_url ? '<img src="' + msg.image_url + '" style="max-width: 100%; border-radius: 8px; margin-top: 5px;">' : ''}
+                    ${!msg.is_mine ? theirAvatarHtml : ''}
+                    <div class="msg ${msg.is_mine ? 'mine' : 'theirs'}">
+                        <div class="msg-text">
+                            ${msg.text ? '<div style="margin-bottom: 4px; white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word;">' + msg.text + '</div>' : ''}
+                            ${msg.image_url ? '<img src="' + msg.image_url + '" style="max-width: 100%; border-radius: 8px; margin-top: 5px;">' : ''}
+                        </div>
+                        <div class="msg-time">${msg.created_at}</div>
                     </div>
-                    <div class="msg-time">${msg.created_at}</div>
+                    ${msg.is_mine ? myAvatarHtml : ''}
                 `;
                 chatBox.appendChild(div);
                 lastMessageId = msg.id;

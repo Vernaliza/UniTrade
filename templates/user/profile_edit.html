@@ -6,7 +6,7 @@
     
     <h2 style="margin-top: 0; margin-bottom: 30px; color: #333; text-align: center;">Edit Profile</h2>
 
-    <form method="POST" action="{% url 'user:profile_edit' %}">
+    <form method="POST" action="{% url 'user:profile_edit' %}" enctype="multipart/form-data">
         {% csrf_token %}
         
         <div style="margin-bottom: 20px;">
@@ -22,6 +22,22 @@
         <div style="margin-bottom: 30px;">
             <label style="display: block; color: #333; font-weight: bold; margin-bottom: 8px;">Delivery Address</label>
             <textarea name="address" rows="3" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; font-family: inherit;">{{ user.profile.address }}</textarea>
+        </div>
+        <div style="margin-bottom: 30px;">
+            <label style="display: block; color: #333; font-weight: bold; margin-bottom: 8px;">Delivery Address</label>
+            <textarea name="address" rows="3" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; font-family: inherit;">{{ user.profile.address }}</textarea>
+        </div>
+        <div style="margin-bottom: 30px;">
+            <label style="display: block; color: #333; font-weight: bold; margin-bottom: 8px;">Profile Picture</label>
+            
+            {% if user.profile.avatar %}
+                <div style="margin-bottom: 10px;">
+                    <img src="{{ user.profile.avatar.url }}" alt="Current Avatar" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;">
+                    <span style="font-size: 12px; color: #666; margin-left: 10px;">Current picture</span>
+                </div>
+            {% endif %}
+            
+            <input type="file" name="avatar" accept="image/*" style="width: 100%; padding: 10px; border: 1px dashed #ccc; border-radius: 6px; background: #fdfdfd;">
         </div>
 
         <div style="display: flex; gap: 15px;">

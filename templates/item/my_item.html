@@ -104,10 +104,10 @@
                         </div>
 
                         <div>
-                            <form action="{% url 'item:item_mark_sold' row.item_id %}" method="post" style="margin: 0;">
+                            <form action="{% url 'item:item_delete' row.item_id %}" method="post" style="margin: 0;">
                                 {% csrf_token %}
-                                <button type="submit" style="background-color: #6c757d; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#5a6268'" onmouseout="this.style.background='#6c757d'" onclick="return confirm('Manually delist this product?');">
-                                    Delist product
+                                <button type="submit" style="background-color: #dc3545; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'" onclick="return confirm('Are you sure you want to permanently delete this product?');">
+                                    Delete product
                                 </button>
                             </form>
                         </div>

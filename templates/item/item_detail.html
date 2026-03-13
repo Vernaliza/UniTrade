@@ -204,7 +204,12 @@
         <div class="seller-card">
             <h4 style="margin-top: 0; margin-bottom: 15px; color: #333;">Seller Information</h4>
             <div class="seller-info">
-                <div class="seller-avatar">{{ item.seller.username|first|upper }}</div>
+                {% if item.seller.profile.avatar %}
+                    <img src="{{ item.seller.profile.avatar.url }}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;">
+                {% else %}
+                    <div class="seller-avatar">{{ item.seller.username|first|upper }}</div>
+                {% endif %}
+                <div>
                 <div>
                     <div style="font-weight: bold; font-size: 16px;">{{ item.seller.username }}</div>
                     

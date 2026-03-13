@@ -110,15 +110,21 @@ def profile_edit(request):
         # recive new data from form
         new_email = request.POST.get('email')
         new_address = request.POST.get('address')
+        
+        # --- NEW: Get the uploaded file ---
+        new_avatar = request.FILES.get('avatar')
 
-        # update user email in django's built-in User model
+        # update user email 
         user = request.user
         user.email = new_email
         user.save()
 
-        # update user address in Profile model
+        # update user address and avatar in Profile model
         if hasattr(user, 'profile'):
             user.profile.address = new_address
+            # --- NEW: Save the avatar if one was uploaded ---
+            if new_avatar:
+                user.profile.avatar = new_avatar
             user.profile.save()
 
         messages.success(request, 'Profile updated successfully!')

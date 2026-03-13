@@ -135,7 +135,11 @@
             <a href="{% url 'message:message_detail' %}?conversation_id={{ data.conversation.id }}" class="conv-card">
                 
                 <div class="avatar-wrapper">
-                    <div class="user-avatar">{{ data.other_user.username|make_list|first }}</div>
+                    {% if data.other_user.profile.avatar %}
+                        <img src="{{ data.other_user.profile.avatar.url }}" alt="{{ data.other_user.username }}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1px solid #eee;">
+                    {% else %}
+                        <div class="user-avatar">{{ data.other_user.username|first|upper }}</div>
+                    {% endif %}
                     <span class="online-dot" style="background: {% if data.other_user_online %}#40c057{% else %}#ced4da{% endif %};"></span>
                 </div>
                 
