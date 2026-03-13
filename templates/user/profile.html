@@ -5,16 +5,37 @@
 <div style="max-width: 600px; margin: 50px auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eaeaea;">
     
     <div style="text-align: center; margin-bottom: 30px;">
+    <div class="avatar-wrapper" style="position: relative; width: 100px; height: 100px; margin: 0 auto 15px;">
+        
         {% if user.profile.avatar %}
-            <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0 auto 15px; display: block;">
+            <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: block;">
         {% else %}
-            <div style="width: 80px; height: 80px; background: #007bff; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin: 0 auto 15px;">
+            <div style="width: 100px; height: 100px; background: #007bff; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
                 {{ user.username|first|upper }}
             </div>
         {% endif %}
-        <h2 style="margin: 0; color: #333;">{{ user.username }}</h2>
-        <p style="color: #666; margin-top: 5px;">Role: <span style="font-weight: bold; color: #28a745;">{{ user.profile.role|title|default:"Student" }}</span></p>
+
+        <label for="avatar-upload-input" title="Change Avatar" 
+               style="position: absolute; bottom: 0; right: 0; background: #d86800; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s;">
+            <span style="font-size: 22px; font-weight: bold; line-height: 1; margin-top: -2px;">+</span>
+        </label>
+
+        <form id="avatar-form" action="{% url 'user:profile_edit' %}" method="POST" enctype="multipart/form-data" style="display: none;">
+            {% csrf_token %}
+            <input type="file" name="avatar" id="avatar-upload-input" accept="image/*" onchange="this.form.submit()">
+        </form>
     </div>
+
+    <h2 style="margin: 0; color: #333;">{{ user.username }}</h2>
+    <p style="color: #666; margin-top: 5px;">Role: <span style="font-weight: bold; color: #28a745;">{{ user.profile.role|title|default:"Student" }}</span></p>
+</div>
+
+<style>
+    label[for="avatar-upload-input"]:hover {
+        transform: scale(1.15);
+        background-color: #bf5c00 !important;
+    }
+</style>
 
     <div style="border-top: 1px solid #eee; padding-top: 20px;">
         <div style="margin-bottom: 20px;">

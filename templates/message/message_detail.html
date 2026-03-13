@@ -6,9 +6,8 @@
     .other-user-info h3 { margin: 0; font-size: 18px; }
     .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
     .chat-box { flex: 1; padding: 20px; overflow-y: auto; background: #fcfcfc; display: flex; flex-direction: column; gap: 15px; }
-    
-    /* 气泡样式 */
-/* 气泡样式 (Bubble Styles) */
+
+/* Bubble Styles */
     .msg-row { display: flex; align-items: flex-end; gap: 10px; max-width: 85%; margin-bottom: 10px; }
     .msg-row.mine { align-self: flex-end; justify-content: flex-end; }
     .msg-row.theirs { align-self: flex-start; justify-content: flex-start; }
@@ -32,7 +31,7 @@
 <div class="chat-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; background: #f8f9fa; border-radius: 12px 12px 0 0; margin-bottom: 20px;">
     
     <div style="display: flex; align-items: center; gap: 15px;">
-        <a href="{% url 'message:message_list' %}" style="text-decoration: none; color: #d86800; font-weight: bold; font-size: 14px;">&larr; Back</a>
+        <a href="{% url 'message:message_list' %}" style="text-decoration: none; color: #d86800; font-weight: bold; font-size: 14px;"> ◀️Back </a>
         
         {% if other_user.profile.avatar %}
             <img src="{{ other_user.profile.avatar.url }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;">
@@ -101,40 +100,101 @@
         {% endfor %}
     </div>
 
-    <form class="chat-input-area" id="chat-form">
+    <!-- <form class="chat-input-area" id="chat-form">
         {% csrf_token %}
         <input type="text" id="msg-input" placeholder="Type a message..." autocomplete="off">
         <button type="submit" class="btn-send">Send</button>
+    </form> -->
+
+    <form class="chat-input-area" id="chat-form" style="align-items: flex-end; position: relative;">
+        {% csrf_token %}
+        
+        <div style="flex: 1; position: relative;">
+            <textarea id="msg-input" maxlength="500" placeholder="Type a message..." 
+                      style="width: 100%; box-sizing: border-box; padding: 12px 15px 30px 15px; border-radius: 12px; border: 1px solid #ddd; outline: none; font-size: 15px; line-height: 1.5; font-family: inherit; resize: none; overflow-y: hidden; min-height: 45px; max-height: 150px; background: #fff; transition: border-color 0.2s;"></textarea>
+            <div id="chat-char-counter" style="position: absolute; bottom: 8px; right: 15px; font-size: 11px; color: #aaa; pointer-events: none; transition: color 0.2s;">
+                0/500
+            </div>
+        </div>
+
+        <button type="submit" class="btn-send" style="height: 45px;">Send</button>
     </form>
+
 </div>
 
 <script>
     const chatBox = document.getElementById('chat-box');
     const chatForm = document.getElementById('chat-form');
     const msgInput = document.getElementById('msg-input');
+    const charCounter = document.getElementById('chat-char-counter');
+    const sendBtn = document.querySelector('.btn-send');
+    const maxLength = 500;
     let lastMessageId = "{% if chat_messages %}{{ chat_messages.last.id }}{% else %}0{% endif %}";
 
-    // 1. 自动滚动到底部
+    // auto to bottom
     const scrollToBottom = () => { chatBox.scrollTop = chatBox.scrollHeight; };
     scrollToBottom();
 
-    // 2. 发送消息 (AJAX)
+    // AJAX send message
     chatForm.onsubmit = async (e) => {
         e.preventDefault();
-        const text = msgInput.value.trim();
+        let text = msgInput.value;
+        text = text.replace(/\n{3,}/g, '\n\n'); // limit consecutive newlines to 2
+        text = text.trim();                     // trim leading/trailing whitespace
         if (!text) return;
-
+        
         const formData = new FormData();
         formData.append('text', text);
         formData.append('conversation_id', "{{ conversation.id }}");
         formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
         msgInput.value = '';
+        msgInput.style.height = 'auto';
+        charCounter.textContent = `0/${maxLength}`;
+        charCounter.style.color = '#aaa'; 
+        charCounter.style.fontWeight = 'normal';
         await fetch("{% url 'message:message_send' %}", { method: 'POST', body: formData });
-        fetchNewMessages(); // 发送后立刻拉取一次
+        fetchNewMessages(); // pull new messages immediately after sending to show the sent message without waiting for the next polling interval
     };
 
-    // 3. 智能轮询 (每3秒拉取一次新消息)
+    msgInput.addEventListener('input', function() {
+        // update character counter
+        const currentLength = this.value.length;
+        charCounter.textContent = `${currentLength}/${maxLength}`;
+
+        if (currentLength >= maxLength * 0.95) {
+            charCounter.style.color = '#dc3545';
+            charCounter.style.fontWeight = 'bold';
+        } else {
+            charCounter.style.color = '#aaa';
+            charCounter.style.fontWeight = 'normal';
+        }
+
+        // height auto-adjustment
+        this.style.height = 'auto';
+        const newHeight = Math.min(this.scrollHeight, 150);
+        this.style.height = newHeight + 'px';
+        
+        // bar overflow handling
+        if (this.scrollHeight > 150) {
+            this.style.overflowY = 'auto';
+        } else {
+            this.style.overflowY = 'hidden';
+        }
+    });
+
+    msgInput.addEventListener('keydown', function(e) {
+        // if Enter is pressed without Shift, trigger form submission
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+
+            if (this.value.trim() !== '') {
+                sendBtn.click(); 
+            }
+        }
+    });
+
+    // pull new messages every 3 seconds
     async function fetchNewMessages() {
         const url = `{% url 'message:message_fetch' %}?conversation_id={{ conversation.id }}&last_message_id=${lastMessageId}`;
         const response = await fetch(url);
@@ -167,7 +227,7 @@
             });
             scrollToBottom();
         }
-        // 更新在线状态文字和状态标颜色
+        // update other user's status
         document.getElementById('user-status').innerText = data.other_user_status;
         document.getElementById('status-dot').style.background = data.other_user_online ? '#28a745' : '#ccc';
     }
