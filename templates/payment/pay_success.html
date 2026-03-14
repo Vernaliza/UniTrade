@@ -1,32 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}Payment Successful - UniTrade{% endblock %}
 
+{% load static %}
+
 {% block extra_css %}
-<style>
-    .status-card {
-        max-width: 450px;
-        margin: 80px auto;
-        background: #fff;
-        padding: 50px 40px;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
-        text-align: center;
-    }
-    .icon-success {
-        font-size: 60px;
-        margin-bottom: 20px;
-    }
-    .status-card h2 { color: #333; margin-top: 0; }
-    .status-card p { color: #666; line-height: 1.6; margin-bottom: 30px; }
-    
-    /* 复用咱们全局的发布按钮类名，但是稍微改宽一点 */
-    .btn-publish.wide {
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-        padding: 15px;
-    }
-</style>
+    <link rel="stylesheet" href="{% static 'css/payment.css' %}">
 {% endblock %}
 
 {% block content %}
