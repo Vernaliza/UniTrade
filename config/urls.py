@@ -35,7 +35,7 @@ def index(request):
     
     if os.path.exists(images_dir):
         for filename in os.listdir(images_dir):
-            if filename.startswith('banner') and filename.endswith(('.jpg', '.jpeg', '.png')):
+            if filename.startswith('banner') and filename.endswith(('.jpg', '.jpeg', '.png', 'webp')):
                 banner_images.append(f'images/{filename}')
     # sort
     banner_images.sort()

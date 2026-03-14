@@ -100,6 +100,19 @@ footer { text-align: center; padding: 20px; color: #666; border-top: 1px solid #
 }
 .btn-refuse:hover { background: #dc3545; color: #fff; }
 
+.hero-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    pointer-events: none;
+}
+
+.carousel-slide {
+    overflow: hidden; 
+}
+
 .hero-section {
     background: linear-gradient(135deg, #003865 0%, #00508f 100%);
     color: white;
