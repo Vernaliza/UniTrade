@@ -1,49 +1,61 @@
 {% extends "base.html" %}
-{% block content %}
 {% load static %}
+
+{% block content %}
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/message.css' %}">
 {% endblock %}
 
+<!-- <div style="max-width: 1100px; margin: 25px auto 5px; display: flex; align-items: center; padding-left: 10px;">
+    <a href="{% url 'message:message_list' %}" class="btn-back">
+        <svg class="icon-arrow" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <path d="M669.6 849.6c8.8 8.8 23.2 8.8 32 0l48-48c8.8-8.8 8.8-23.2 0-32L416.8 512l332.8-257.6c8.8-8.8 8.8-23.2 0-32l-48-48c-8.8-8.8-23.2-8.8-32 0L300.8 496c-8.8 8.8-8.8 23.2 0 32l368.8 321.6z"></path>
+        </svg>
+        <span>Back</span>
+    </a>
+</div> -->
+
 <div class="chat-wrapper">
-<div class="chat-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; background: #f8f9fa; border-radius: 12px 12px 0 0; margin-bottom: 20px;">
-    
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <a href="{% url 'message:message_list' %}" style="text-decoration: none; color: #d86800; font-weight: bold; font-size: 14px;"> ◀️Back </a>
-        
-        {% if other_user.profile.avatar %}
-            <img src="{{ other_user.profile.avatar.url }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;">
-        {% else %}
-            <div style="width: 45px; height: 45px; border-radius: 50%; background: #d86800; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px;">
-                {{ other_user.username|first|upper }}
-            </div>
-        {% endif %}
-        
-        <div class="other-user-info">
-            <h3 style="margin: 0; font-size: 18px;">{{ other_user.username }}</h3>
-            <span id="status-dot" class="status-dot" style="background: {% if other_user_online %}#28a745{% else %}#ccc{% endif %}; width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>
-            <small id="user-status" style="font-size: 12px; color: #666;">{{ other_user_status }}</small>
-        </div>
-    </div>
-
-    {% if conversation.item %}
-    <div class="item-snapshot">
-        <a href="{% url 'item:item_detail' conversation.item.id %}" style="text-decoration: none; color: inherit;">
-            <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 8px 15px; border-radius: 8px; border: 1px solid #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                {% if conversation.item.image %}
-                    <img src="{{ conversation.item.image.url }}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;">
-                {% endif %}
-                <div>
-                    <div style="font-weight: bold; font-size: 14px;">{{ conversation.item.title|truncatechars:20 }}</div>
-                    <div style="color: #d9534f; font-weight: bold; font-size: 13px;">£{{ conversation.item.price }}</div>
+    <div class="chat-header">
+        <div class="chat-header-left">
+            <a href="{% url 'message:message_list' %}" class="btn-back icon-only">
+                <svg class="icon-arrow" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M669.6 849.6c8.8 8.8 23.2 8.8 32 0l48-48c8.8-8.8 8.8-23.2 0-32L416.8 512l332.8-257.6c8.8-8.8 8.8-23.2 0-32l-48-48c-8.8-8.8-23.2-8.8-32 0L300.8 496c-8.8 8.8-8.8 23.2 0 32l368.8 321.6z"></path>
+                </svg>
+            </a>
+            {% if other_user.profile.avatar %}
+                <img src="{{ other_user.profile.avatar.url }}" class="chat-header-avatar">
+            {% else %}
+                <div class="chat-header-fallback">
+                    {{ other_user.username|first|upper }}
                 </div>
+            {% endif %}
+            
+            <div class="other-user-info">
+                <h3>{{ other_user.username }}</h3>
+                <span id="status-dot" class="status-dot" style="background: {% if other_user_online %}#28a745{% else %}#ccc{% endif %};"></span>
+                <small id="user-status" class="user-status-text">{{ other_user_status }}</small>
             </div>
-        </a>
-    </div>
-    {% endif %}
-</div>
+        </div>
 
-<div class="chat-box" id="chat-box">
+        {% if conversation.item %}
+        <div class="item-snapshot">
+            <a href="{% url 'item:item_detail' conversation.item.id %}" class="item-snapshot-link">
+                <div class="item-snapshot-card">
+                    {% if conversation.item.image %}
+                        <img src="{{ conversation.item.image.url }}" class="item-snapshot-img">
+                    {% endif %}
+                    <div class="item-snapshot-info">
+                        <div class="item-snapshot-title">{{ conversation.item.title|truncatechars:20 }}</div>
+                        <div class="item-snapshot-price">£{{ conversation.item.price }}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="chat-box" id="chat-box">
         {% for msg in chat_messages %}
             <div class="msg-row {% if msg.sender == request.user %}mine{% else %}theirs{% endif %}" data-id="{{ msg.id }}">
                 
@@ -58,10 +70,10 @@
                 <div class="msg {% if msg.sender == request.user %}mine{% else %}theirs{% endif %}">
                     <div class="msg-text">
                         {% if msg.text %}
-                            <div style="margin-bottom: 4px; white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word;">{{ msg.text }}</div>
+                            <div class="msg-text-content">{{ msg.text }}</div>
                         {% endif %}
                         {% if msg.image %}
-                            <img src="{{ msg.image.url }}" alt="Image" style="max-width: 100%; border-radius: 8px; margin-top: 5px;">
+                            <img src="{{ msg.image.url }}" alt="Image" class="msg-image">
                         {% endif %}
                     </div>
                     <div class="msg-time">{{ msg.created_at|date:"Y-m-d H:i:s" }}</div>
@@ -78,24 +90,15 @@
         {% endfor %}
     </div>
 
-    <!-- <form class="chat-input-area" id="chat-form">
-        {% csrf_token %}
-        <input type="text" id="msg-input" placeholder="Type a message..." autocomplete="off">
-        <button type="submit" class="btn-send">Send</button>
-    </form> -->
-
-    <form class="chat-input-area" id="chat-form" style="align-items: flex-end; position: relative;">
+    <form class="chat-input-area" id="chat-form">
         {% csrf_token %}
         
-        <div style="flex: 1; position: relative;">
-            <textarea id="msg-input" maxlength="500" placeholder="Type a message..." 
-                      style="width: 100%; box-sizing: border-box; padding: 12px 15px 30px 15px; border-radius: 12px; border: 1px solid #ddd; outline: none; font-size: 15px; line-height: 1.5; font-family: inherit; resize: none; overflow-y: hidden; min-height: 45px; max-height: 150px; background: #fff; transition: border-color 0.2s;"></textarea>
-            <div id="chat-char-counter" style="position: absolute; bottom: 8px; right: 15px; font-size: 11px; color: #aaa; pointer-events: none; transition: color 0.2s;">
-                0/500
-            </div>
+        <div class="chat-input-wrapper">
+            <textarea id="msg-input" maxlength="500" placeholder="Type a message..." class="chat-textarea"></textarea>
+            <div id="chat-char-counter" class="chat-char-counter">0/500</div>
         </div>
 
-        <button type="submit" class="btn-send" style="height: 45px;">Send</button>
+        <button type="submit" class="btn-send">Send</button>
     </form>
 
 </div>
@@ -109,16 +112,14 @@
     const maxLength = 500;
     let lastMessageId = "{% if chat_messages %}{{ chat_messages.last.id }}{% else %}0{% endif %}";
 
-    // auto to bottom
     const scrollToBottom = () => { chatBox.scrollTop = chatBox.scrollHeight; };
     scrollToBottom();
 
-    // AJAX send message
     chatForm.onsubmit = async (e) => {
         e.preventDefault();
         let text = msgInput.value;
-        text = text.replace(/\n{3,}/g, '\n\n'); // limit consecutive newlines to 2
-        text = text.trim();                     // trim leading/trailing whitespace
+        text = text.replace(/\n{3,}/g, '\n\n'); 
+        text = text.trim();                     
         if (!text) return;
         
         const formData = new FormData();
@@ -132,11 +133,10 @@
         charCounter.style.color = '#aaa'; 
         charCounter.style.fontWeight = 'normal';
         await fetch("{% url 'message:message_send' %}", { method: 'POST', body: formData });
-        fetchNewMessages(); // pull new messages immediately after sending to show the sent message without waiting for the next polling interval
+        fetchNewMessages(); 
     };
 
     msgInput.addEventListener('input', function() {
-        // update character counter
         const currentLength = this.value.length;
         charCounter.textContent = `${currentLength}/${maxLength}`;
 
@@ -148,12 +148,10 @@
             charCounter.style.fontWeight = 'normal';
         }
 
-        // height auto-adjustment
         this.style.height = 'auto';
         const newHeight = Math.min(this.scrollHeight, 150);
         this.style.height = newHeight + 'px';
         
-        // bar overflow handling
         if (this.scrollHeight > 150) {
             this.style.overflowY = 'auto';
         } else {
@@ -162,25 +160,21 @@
     });
 
     msgInput.addEventListener('keydown', function(e) {
-        // if Enter is pressed without Shift, trigger form submission
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-
             if (this.value.trim() !== '') {
                 sendBtn.click(); 
             }
         }
     });
 
-    // pull new messages every 3 seconds
     async function fetchNewMessages() {
         const url = `{% url 'message:message_fetch' %}?conversation_id={{ conversation.id }}&last_message_id=${lastMessageId}`;
         const response = await fetch(url);
         const data = await response.json();
 
-    if (data.chat_messages && data.chat_messages.length > 0) {
+        if (data.chat_messages && data.chat_messages.length > 0) {
             
-            // HTML chunks for the Javascript to inject
             const myAvatarHtml = `{% if request.user.profile.avatar %}<img src="{{ request.user.profile.avatar.url }}" class="msg-avatar">{% else %}<div class="msg-avatar-fallback">{{ request.user.username|first|upper }}</div>{% endif %}`;
             const theirAvatarHtml = `{% if other_user.profile.avatar %}<img src="{{ other_user.profile.avatar.url }}" class="msg-avatar">{% else %}<div class="msg-avatar-fallback">{{ other_user.username|first|upper }}</div>{% endif %}`;
 
@@ -189,12 +183,14 @@
                 const div = document.createElement('div');
                 div.className = `msg-row ${msg.is_mine ? 'mine' : 'theirs'}`;
                 div.dataset.id = msg.id;
+                
+                // 🚀 注意看这里：原来 JS 里的内联样式我也帮你清掉了，换成了 class
                 div.innerHTML = `
                     ${!msg.is_mine ? theirAvatarHtml : ''}
                     <div class="msg ${msg.is_mine ? 'mine' : 'theirs'}">
                         <div class="msg-text">
-                            ${msg.text ? '<div style="margin-bottom: 4px; white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word;">' + msg.text + '</div>' : ''}
-                            ${msg.image_url ? '<img src="' + msg.image_url + '" style="max-width: 100%; border-radius: 8px; margin-top: 5px;">' : ''}
+                            ${msg.text ? '<div class="msg-text-content">' + msg.text + '</div>' : ''}
+                            ${msg.image_url ? '<img src="' + msg.image_url + '" class="msg-image">' : ''}
                         </div>
                         <div class="msg-time">${msg.created_at}</div>
                     </div>
@@ -205,7 +201,6 @@
             });
             scrollToBottom();
         }
-        // update other user's status
         document.getElementById('user-status').innerText = data.other_user_status;
         document.getElementById('status-dot').style.background = data.other_user_online ? '#28a745' : '#ccc';
     }
