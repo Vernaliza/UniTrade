@@ -24,9 +24,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-(qnk_v9u8h8@x5ou9ocmj!q&dwy*uc9z%4m36^1l)8-qeis2sz"
 
 # SECURITY WARNING: don't run with debug turned on in production!
+#DEBUG = False
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ["8.208.127.158","www.unitrade.world","unitrade.world"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://unitrade.world",
+    "http://www.unitrade.world",
+    "https://unitrade.world",
+    "https://www.unitrade.world",
+]
 
 
 # Application definition
@@ -38,13 +47,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+
     "administrator",
     "item.apps.ItemConfig",
     "message",
     "order",
     "review.apps.ReviewConfig",
-    "user",
-    "payment"
+    "user.apps.UserConfig",
+    "payment",
+    "email_verify.apps.EmailVerifyConfig",
 ]
 
 MIDDLEWARE = [
@@ -55,7 +69,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'message.middleware.UpdateLastSeenMiddleware'
+    'message.middleware.UpdateLastSeenMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -70,6 +85,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                'message.context_processors.unread_messages',
             ],
         },
     },
@@ -90,9 +106,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "default_db",
-        "USER": "default_user",
-        "PASSWORD": "",
+        "NAME": "unitrade_db_0",
+        "USER": "admin",
+        "PASSWORD": "admin",
         "HOST": "unidb.cbww2mgac5hy.eu-west-2.rds.amazonaws.com",
         "PORT": "3306",
     }
@@ -137,7 +153,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = "/var/www/UniTrade/static"
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -148,4 +168,43 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Media files (Images, Videos, etc.)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = "/var/www/UniTrade/media"
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+ACCOUNT_LOGIN_METHODS = {"username", "email"}
+ACCOUNT_SIGNUP_FIELDS = ["username*", "email*", "password1*", "password2*"]
+
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_CHANGE_EMAIL = False
+
+ACCOUNT_ADAPTER = "email_verify.adapter.AcUkAccountAdapter"
+
+ACCOUNT_FORMS = {
+    "signup": "email_verify.forms.AcUkSignupForm",
+}
+
+LOGIN_REDIRECT_URL = "/user/dashboard/"
+LOGOUT_REDIRECT_URL = "/"
+
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.office365.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = "unitradeworld@outlook.com"
+EMAIL_HOST_PASSWORD = "Unitrade233"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER

@@ -22,6 +22,7 @@ class Profile(models.Model):
     student_id = models.CharField(max_length=20, blank=True, verbose_name="Student ID")
     phone = models.CharField(max_length=20, blank=True, verbose_name="Phone Number")
     address = models.CharField(max_length=255, blank=True, verbose_name="Address")
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, verbose_name="Profile Picture")
 
     def __str__(self):
         return f"{self.user.username}'s {self.role} Profile"

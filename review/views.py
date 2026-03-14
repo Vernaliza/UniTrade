@@ -10,7 +10,7 @@ from django.db import IntegrityError
 from .models import ReviewLike
 from .models import ReviewImage
 
-@login_required
+@login_required(login_url='/user/login/')
 def review_create(request, order_id):
     if request.method == "POST":
         rating = request.POST.get("rating")
@@ -42,7 +42,7 @@ def review_create(request, order_id):
 
 
 
-@login_required
+@login_required(login_url='/user/login/')
 def review_share(request, review_id):
     review = get_object_or_404(Review, id=review_id, customer=request.user)
     if not review.share_token:
@@ -68,7 +68,7 @@ def review_share_page(request, token):
     })
 
 
-@login_required
+@login_required(login_url='/user/login/')
 def review_report(request, review_id):
 
     if request.method == "POST":
@@ -91,7 +91,7 @@ def review_report(request, review_id):
 
     return JsonResponse({"error": "Invalid request"})
 
-@login_required
+@login_required(login_url='/user/login/')
 def review_edit(request, review_id):
     review = get_object_or_404(Review, id=review_id, customer=request.user)
     if request.method == "POST":
@@ -115,7 +115,7 @@ def review_edit(request, review_id):
         "content": review.content
     })
 
-@login_required
+@login_required(login_url='/user/login/')
 def review_delete(request, review_id):
 
     review = get_object_or_404(Review, id=review_id, customer=request.user)
@@ -126,7 +126,7 @@ def review_delete(request, review_id):
         "status": "deleted"
     })
 
-@login_required
+@login_required(login_url='/user/login/')
 def review_score(request, review_id):
 
     if request.method == "POST":
@@ -149,7 +149,7 @@ def review_score(request, review_id):
     return JsonResponse({"error": "Invalid request"})
 
 
-@login_required
+@login_required(login_url='/user/login/')
 def review_list(request):
 
     reviews = Review.objects.filter(customer=request.user)
@@ -168,7 +168,7 @@ def review_list(request):
     })
 
 
-@login_required
+@login_required(login_url='/user/login/')
 def review_search(request):
 
     keyword = request.GET.get("q")
@@ -194,7 +194,7 @@ def review_search(request):
     })
 
 
-@login_required
+@login_required(login_url='/user/login/')
 def review_like_toggle(request, review_id):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request"}, status=400)

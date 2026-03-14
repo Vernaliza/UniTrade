@@ -11,7 +11,7 @@ from message.models import Notification
 from .models import Payment
 
 
-@login_required
+@login_required(login_url='/user/login/')
 def pay_order(request, order_id):
     order = get_object_or_404(Order, id=order_id, customer=request.user)
 
@@ -34,7 +34,7 @@ def pay_order(request, order_id):
     })
 
 
-@login_required
+@login_required(login_url='/user/login/')
 @transaction.atomic
 def pay_confirm(request, order_id):
     if request.method != "POST":
@@ -103,7 +103,7 @@ def pay_confirm(request, order_id):
     return redirect("payment:pay_success", order_id=order.id)
 
 
-@login_required
+@login_required(login_url='/user/login/')
 def pay_success(request, order_id):
     order = get_object_or_404(Order, id=order_id, customer=request.user)
     return render(request, "payment/pay_success.html", {"order": order})

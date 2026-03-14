@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/message.css' %}">
+{% endblock %}
+
+<div class="list-wrapper">
+    <h2 class="page-title">Messages</h2>
+    
+    <div class="conv-list">
+        {% for data in conversation_data %}
+            <a href="{% url 'message:message_detail' %}?conversation_id={{ data.conversation.id }}" class="conv-card">
+                
+                <div class="avatar-wrapper">
+                    {% if data.other_user.profile.avatar %}
+                        <img src="{{ data.other_user.profile.avatar.url }}" alt="{{ data.other_user.username }}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1px solid #eee;">
+                    {% else %}
+                        <div class="user-avatar">{{ data.other_user.username|first|upper }}</div>
+                    {% endif %}
+                    <span class="online-dot" style="background: {% if data.other_user_online %}#40c057{% else %}#ced4da{% endif %};"></span>
+                </div>
+                
+                <div class="conv-content">
+                    <div class="conv-header">
+                        <h3 class="user-name">{{ data.other_user.username }}</h3>
+                    </div>
+                    <div class="item-tag">📦 {{ data.conversation.item.title|truncatechars:25 }}</div>
+                    <p class="last-msg">
+                        {% if data.last_message %}
+                            {% if data.last_message.sender == request.user %}You: {% endif %}
+                            {% if data.last_message.image %}[Image]{% else %}{{ data.last_message.text }}{% endif %}
+                        {% else %}
+                            <span style="font-style: italic; color: #ced4da;">No messages yet</span>
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div class="conv-meta">
+                    <span class="status-text">{{ data.other_user_status }}</span>
+                    {% if data.unread_count > 0 %}
+                        <span class="unread-badge">{{ data.unread_count }}</span>
+                    {% endif %}
+                </div>
+            </a>
+        {% empty %}
+            <div class="empty-state">
+                <div style="font-size: 40px; margin-bottom: 10px;">📭</div>
+                <p>Your inbox is empty.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

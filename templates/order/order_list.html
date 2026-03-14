@@ -3,30 +3,10 @@
 {% block title %}My Orders - UniTrade{% endblock %}
 
 {% block content %}
-<style>
-    .order-container { max-width: 900px; margin: 40px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .page-title { color: #333; margin-bottom: 30px; font-size: 28px; }
-    
-    .order-card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 25px; overflow: hidden; border: 1px solid #eee; }
-    .order-header { background: #f8f9fa; padding: 15px 25px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; font-size: 14px; color: #555; }
-    .order-header-left span { margin-right: 20px; }
-    .order-header-right { font-weight: bold; color: #333; }
-    
-    .order-body { padding: 25px; display: flex; align-items: flex-start; gap: 20px; }
-    .order-item-img { width: 80px; height: 80px; border-radius: 8px; background: #f0f0f0; object-fit: cover; }
-    .order-info { flex: 1; }
-    .order-title { margin: 0 0 10px 0; font-size: 20px; color: #333; }
-    .order-price { color: #d9534f; font-weight: bold; font-size: 18px; margin-bottom: 15px; }
-    
-    /* Seller contact card */
-    .contact-card { background: #e8f4fd; border: 1px solid #b8daff; border-radius: 8px; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
-    .contact-info h4 { margin: 0 0 5px 0; color: #0056b3; }
-    .contact-info p { margin: 0; color: #333; font-weight: bold; font-size: 16px; }
-    .badge-success { background: #28a745; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-
-    .empty-orders { text-align: center; padding: 60px 20px; background: white; border-radius: 12px; border: 1px dashed #ccc; }
-    .btn-shopping { display: inline-block; background: #007bff; color: white; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; margin-top: 20px; }
-</style>
+{% load static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/order.css' %}">
+{% endblock %}
 
 <div class="order-container">
     <h1 class="page-title">📦 My Orders</h1>
@@ -77,6 +57,16 @@
                                 <div style="background: #28a745; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">
                                     Completed
                                 </div>
+
+                                {% if order.review %}
+                                    <button class="btn-review secondary" onclick="openReviewModal('{{ order.id }}', '{{ order.review.rating }}', '{{ order.review.content|escapejs }}')">
+                                        Edit Review
+                                    </button>
+                                {% else %}
+                                    <button class="btn-review primary" onclick="openReviewModal('{{ order.id }}')">
+                                        Review Item
+                                    </button>
+                                {% endif %}
                                 
                             {% elif order.status == 'cancelled' %}
                                 <div style="background: #dc3545; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">
@@ -103,4 +93,114 @@
         </div>
     {% endif %}
 </div>
+
+<div id="reviewModal" class="modal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="background: white; width: 90%; max-width: 500px; margin: 10% auto; padding: 25px; border-radius: 12px; position: relative;">
+        <span onclick="closeModal()" style="position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 24px;">&times;</span>
+        
+        <h3 id="modalTitle" style="margin-top: 0;">Rate your purchase</h3>
+        
+        <form id="reviewForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="order_id" id="modalOrderId">
+            
+            <div class="star-rating" style="margin: 20px 0; font-size: 30px; color: #ddd; cursor: pointer;">
+                <span class="star" data-value="1">★</span>
+                <span class="star" data-value="2">★</span>
+                <span class="star" data-value="3">★</span>
+                <span class="star" data-value="4">★</span>
+                <span class="star" data-value="5">★</span>
+                <input type="hidden" name="rating" id="selectedRating" value="5">
+            </div>
+
+            <textarea name="content" id="reviewContent" placeholder="How was the item? (Condition, delivery, etc.)" 
+                      style="width: 100%; height: 120px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-family: inherit;"></textarea>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 5px;">Upload Photos (optional):</label>
+                <input type="file" name="images" multiple accept="image/*" style="font-size: 14px;">
+            </div>
+
+            <button type="submit" id="submitReviewBtn" 
+                    style="width: 100%; background: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                Submit Review
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .star.active { color: #ffc107; }
+    .btn-review { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; }
+    .btn-review.primary { background: #007bff; color: white; }
+    .btn-review.secondary { background: #e9ecef; color: #495057; }
+    .btn-review:hover { opacity: 0.8; transform: translateY(-1px); }
+</style>
+
+<script>
+let currentOrderId = null;
+
+// open review window
+function openReviewModal(orderId, rating = 5, content = '') {
+    currentOrderId = orderId;
+    document.getElementById('modalOrderId').value = orderId;
+    document.getElementById('reviewContent').value = content;
+    document.getElementById('reviewModal').style.display = 'block';
+    updateStars(rating);
+    document.getElementById('modalTitle').innerText = content ? 'Edit your review' : 'Rate your purchase';
+}
+
+function closeModal() {
+    document.getElementById('reviewModal').style.display = 'none';
+}
+
+// Star rating logic
+const stars = document.querySelectorAll('.star');
+stars.forEach(star => {
+    star.addEventListener('click', () => {
+        const val = star.getAttribute('data-value');
+        updateStars(val);
+    });
+});
+
+function updateStars(val) {
+    document.getElementById('selectedRating').value = val;
+    stars.forEach(s => {
+        s.classList.toggle('active', s.getAttribute('data-value') <= val);
+    });
+}
+
+// AJAX to backend review_create
+document.getElementById('reviewForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitReviewBtn');
+    btn.disabled = true;
+    btn.innerText = "Submitting...";
+
+    const formData = new FormData(this);
+    
+    fetch(`/review/create/${currentOrderId}/`, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success' || data.status === 'updated') {
+            alert('Review submitted! 🫡');
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Submission failed'));
+            btn.disabled = false;
+            btn.innerText = "Submit Review";
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Server connection failed');
+        btn.disabled = false;
+    });
+});
+</script>
+
 {% endblock %}

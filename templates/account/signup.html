@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Register - UniTrade{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/user.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2 class="auth-title">Create an Account</h2>
+
+    <form method="post" action="{% url 'account_signup' %}" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+        {% endif %}
+        <button type="submit" class="btn-publish btn-submit">Register</button>
+    </form>
+
+    <p style="text-align: center; margin-top: 25px; font-size: 14px; color: #666;">
+        Already have an account?
+        <a href="{% url 'account_login' %}" style="color: #d86800; text-decoration: none; font-weight: bold;">Login here</a>
+    </p>
+</div>
+{% endblock %}

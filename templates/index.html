@@ -1,72 +1,108 @@
-{% extends "base.html" %}
-
-{% block title %}Home - UniTrade{% endblock %}
-
-{% block extra_css %}
-<style>
-    .dashboard-container { display: flex; gap: 30px; margin-top: 10px; }
-    
-    /* sidebar */
-    .sidebar { width: 220px; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; height: fit-content; }
-    .sidebar h3 { margin-top: 0; font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 10px; color: #333; }
-    
-    .category-link { display: block; padding: 10px 0; color: #555; text-decoration: none; border-bottom: 1px solid #eee; }
-    .category-link:hover { color: #007bff; font-weight: bold; }
-
-    /* items */
-    .item-grid { flex-grow: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-    
-    /* item card */
-    .item-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; text-decoration: none; color: inherit; transition: box-shadow 0.2s; }
-    .item-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    
-    .item-img-placeholder { height: 180px; background: #eaeaea; display: flex; align-items: center; justify-content: center; color: #888; font-size: 14px; }
-    
-    .item-info { padding: 15px; }
-    .item-title { margin: 0 0 10px 0; font-size: 16px; font-weight: bold; }
-    .item-price { margin: 0 0 5px 0; font-size: 18px; color: #d9534f; font-weight: bold; }
-    .item-location { margin: 0; font-size: 13px; color: #666; }
-</style>
+{% extends 'base.html' %}
+{% load static %}
+{% block nav_search %}
 {% endblock %}
+{% block title %}Welcome to UniTrade{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    
-    <aside class="sidebar">
-        <h3>Categories</h3>
-        <a href="#" class="category-link">All Items</a>
-        <a href="#" class="category-link">Textbooks</a>
-        <a href="#" class="category-link">Electronics</a>
-        <a href="#" class="category-link">Clothing</a>
-    </aside>
 
-    <div class="item-grid">
-        {% for item in items %}
-        <a href="{% url 'item:item_detail' item.id %}" class="item-card" style="text-decoration: none; color: inherit;">
-            
-            {% if item.image %}
-                <div style="height: 200px; overflow: hidden; border-top-left-radius: 8px; border-top-right-radius: 8px;">
-                    <img src="{{ item.image.url }}" alt="{{ item.title }}" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-            {% else %}
-                <div class="item-img-placeholder" style="height: 200px; display: flex; align-items: center; justify-content: center; background: #eee; color: #999;">
-                    No Image
-                </div>
-            {% endif %}
-
-            <div class="item-info">
-                <h4 class="item-title">{{ item.title }}</h4>
-                <p class="item-price">£{{ item.price }}</p> 
-                <p class="item-location">📍 {{ item.position|default:"Campus" }}</p>
+<div class="hero-carousel-container">
+    {% if banner_images %}
+        {% for banner in banner_images %}
+            <div class="carousel-slide {% if forloop.first %}active{% endif %}" 
+                 style="background-image: url('{% static banner %}'); background-size: cover; background-position: center;">
             </div>
-        </a>
-        
-        {% empty %}
-        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #888;">
-            <p style="font-size: 48px; margin-bottom: 10px;">🛒</p>
-            <p>No items found in the marketplace right now.</p>
-        </div>
         {% endfor %}
+    {% else %}
+        <div class="carousel-slide active" style="background-color: #003865;"></div>
+    {% endif %}
+
+    <div class="hero-overlay">
+        <h1 class="hero-title">Unitrade</h1>
+        <p class="hero-subtitle">Buy, sell, and connect exclusively with verified students.</p>
+        
+        <form action="{% url 'item:item_search' %}" method="GET" class="hero-search-form" autocomplete="off">
+            <input type="text" name="q" id="hero-search-input" autocomplete="off" class="hero-search-input" placeholder="What are you looking for today? (e.g. Textbooks, Monitor)">
+            <!-- <button type="submit" class="hero-search-btn">Search</button> -->
+            <button type="submit" class="hero-search-btn">
+                <span class="search-text-desktop">Search</span>
+                <span class="search-icon-mobile" style="display: none;">🔍</span>
+            </button>
+            <div id="hero-search-dropdown"></div>
+        </form>
     </div>
 </div>
+
+<div class="action-grid">
+    <a href="{% url 'item:item_list' %}" class="action-card">
+        <div class="action-icon">🛍️</div>
+        <div class="action-title">Browse Items</div>
+        <div class="action-desc">Find great deals from fellow students.</div>
+    </a>
+    
+    {% if user.profile.role == 'merchant' %}
+        <a href="{% url 'item:item_create' %}" class="action-card">
+            <div class="action-icon">💰</div>
+            <div class="action-title">Sell an Item</div>
+            <div class="action-desc">Turn your old stuff into quick cash.</div>
+        </a>
+    {% endif %}
+    
+    <a href="{% url 'message:message_list' %}" class="action-card">
+        <div class="action-icon">💬</div>
+        <div class="action-title">My Messages</div>
+        <div class="action-desc">Chat with buyers and sellers.</div>
+    </a>
+    
+    <a href="{% url 'user:profile' %}" class="action-card">
+        <div class="action-icon">👤</div>
+        <div class="action-title">My Profile</div>
+        <div class="action-desc">Update your address & preferences.</div>
+    </a>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px;">
+    <h2 class="section-title" style="margin-bottom: 0;">Fresh on Campus</h2>
+    <a href="{% url 'item:item_list' %}" style="text-decoration: none; color: #d86800; font-weight: bold; font-size: 20px; padding: 6px 15px; border-radius: 20px; background-color: #f8f3f0; transition: all 0.2s ease;">
+        View More >
+    </a>
+</div>
+
+<div class="items-grid">
+    {% if latest_items %}
+        {% for item in latest_items %}
+        <a href="{% url 'item:item_detail' item.id %}" class="item-card">
+            
+            <div class="item-image" style="width: 100%; height: 180px; overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #f4f4f4;">
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <span style="color: #bbb; font-size: 2rem;">📸</span>
+                {% endif %}
+            </div>
+            <div class="item-info">
+                <h3 class="item-title">{{ item.title }}</h3>
+                <div class="item-price">£{{ item.price }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    {% else %}
+        <p style="color: #777; font-style: italic;">No items listed yet. Be the first to sell something!</p>
+    {% endif %}
+</div>
+
+<script>    // hero-carousel-container pic js
+    document.addEventListener('DOMContentLoaded', function() {
+        let slides = document.querySelectorAll('.carousel-slide');
+        if (slides.length > 0) {
+            let currentSlide = 0;
+            setInterval(() => {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }, 5000);
+        }
+    });
+</script>
+
 {% endblock %}

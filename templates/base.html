@@ -1,115 +1,33 @@
-{% load static %} <!DOCTYPE html>
+{% load static %} 
+<!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <title>{% block title %}UniTrade - Better Marketplace{% endblock %}</title>
-
-    <style>
-        /* body */
-        body { margin: 0; font-family: Arial, sans-serif; background-color: #f9f9f9; color: #000; }
-        
-        /* header */
-        header { background: #fff; border-bottom: 2px solid #e0e0e0; padding: 15px 30px; }
-        nav { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 24px; font-weight: bold; color: #333; text-decoration: none; }
-        
-      /* Search bar */
-        .search-bar { flex-grow: 1; margin: 0 40px; position: relative; } /* Added position: relative */
-        .search-bar input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        
-        /* NEW: Live Search Dropdown Styles */
-        .search-dropdown {
-            position: absolute; top: 100%; left: 0; width: 100%; background: white;
-            border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            z-index: 1000; display: none; max-height: 400px; overflow-y: auto; margin-top: 5px;
-        }
-        .search-dropdown-item {
-            display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #eee;
-            text-decoration: none; color: #333; transition: background 0.2s;
-        }
-        .search-dropdown-item:hover { background-color: #f8f9fa; }
-        .search-dropdown-img {
-            width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin-right: 15px; background: #eee;
-        }
-        
-        /* nav-link */
-        .nav-links { display: flex; gap: 15px; align-items: center; }
-        .nav-links a { text-decoration: none; color: #333; font-weight: bold; padding: 8px 12px; }
-        .nav-links a:hover { background-color: #f0f0f0; border-radius: 4px; }
-        
-        /* Button */
-        .btn-publish {
-            text-decoration: none;
-            display: inline-block;
-            border: none;
-            font-weight: 700;
-            font-size: 15px;
-
-            padding: 10px 22px; 
-            margin-right: 5px;
-            border-radius: 8px; 
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: #fff !important;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.25);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* hover */
-        .btn-publish:hover {
-            background: linear-gradient(135deg, #0088ff 0%, #0062cc 100%);
-            transform: translateY(-2px) scale(1.05);
-            border-radius: 8.4px;
-            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.45);
-            opacity: 1;
-        }
-
-        .btn-publish:after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-
-            background: radial-gradient(
-                circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-                rgba(255, 255, 255, 0.3) 10%,
-                rgba(255, 255, 255, 0) 60%
-            );
-            
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .btn-publish:hover:after {
-            opacity: 1;
-        }
-
-        /* Message */
-        .alert { padding: 15px; margin: 20px 30px; border-radius: 4px; font-weight: bold; }
-        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-
-        main { padding: 20px 30px; min-height: 70vh; }
-    
-        footer { text-align: center; padding: 20px; color: #666; border-top: 1px solid #e0e0e0; margin-top: 40px; }
-    </style>
-
-    {% block extra_css %}{% endblock %}
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'favicon/android-chrome-192x192.png' %}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'favicon/android-chrome-512x512.png' %}">
 </head>
 <body>
     <header>
         <nav>
-            <a href="{% url 'item:item_list' %}" class="logo">UniTrade</a>
+            <a href="{% url 'index' %}" style="text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                <img src="{% static 'favicon/android-chrome-192x192.png' %}" alt="UniTrade Logo" style="height: 38px; width: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <span style="font-size: 16px; font-weight: 800; font-family: 'Segoe UI', Roboto, sans-serif; letter-spacing: -0.5px; color: #333; margin-top: 5px;">
+                    Trade
+                </span>
+            </a>
             
-<div class="search-bar">
+            {% block nav_search %}
+            <div class="search-bar">
                 <form action="{% url 'item:item_search' %}" method="GET">
                     <input type="text" id="live-search-input" name="q" placeholder="Search items (e.g. Textbooks)..." aria-label="Search items" autocomplete="off">
                     
@@ -120,10 +38,14 @@
                 
                 <div id="search-results-dropdown" class="search-dropdown"></div>
             </div>
+            {% endblock %}
 
             <div class="nav-links">
                 {% if user.is_authenticated %}
-                    <span style="color: #666; margin-right: 10px;">Hi, {{ user.username }}</span>
+                    <a href="{% url 'user:profile' %}" style="text-decoration: none; color: #333; font-weight: bold; display: flex; align-items: center; gap: 5px; margin-right: 15px;">
+                        <i class="bi bi-person-circle" style="font-size: 1.2rem; color: #d86800;"></i>
+                        Hi, {{ user.username }}
+                    </a>
                     
                     {% if user.is_staff %}
                         <a href="{% url 'administrator:dashboard' %}" class="btn-publish" style="background-color: #dc3545;">Admin Panel</a>
@@ -132,10 +54,24 @@
                     {% if user.profile.role == 'merchant' %}
                         <a href="{% url 'item:item_create' %}" class="btn-publish">+ Add New Item</a>
                         <a href="{% url 'item:my_item' %}">My Shop</a>
+                        <a href="{% url 'message:message_list' %}" style="position: relative; display: inline-block; text-decoration: none; color: #333; font-weight: bold; margin-right: 0ch;">
+                            Messages
+                            
+                            <span id="global-unread-badge" style="position: absolute; top: -8px; right: -12px; background-color: #ff3b30; color: white; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 12px; line-height: 1; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(255, 59, 48, 0.3); display: {% if unread_count > 0 %}inline-block{% else %}none{% endif %};">
+                                {{ unread_count }}
+                            </span>
+                        </a>
                     {% else %}
-                        <a href="{% url 'item:item_list' %}" style="margin-right: 15px; text-decoration: none; color: #333; font-weight: bold;">Browse Items</a>
-                        <a href="/orderbasket/" style="margin-right: 15px; text-decoration: none; color: #333; font-weight: bold;">Basket</a>
+                        <a href="{% url 'item:item_list' %}" style="text-decoration: none; color: #333; font-weight: bold;">Browse Items</a>
+                        <a href="/orderbasket/" style="text-decoration: none; color: #333; font-weight: bold;">Basket</a>
                         <a href="/order" style="text-decoration: none; color: #333; font-weight: bold;">My Orders</a>
+                        <a href="{% url 'message:message_list' %}" style="position: relative; display: inline-block; text-decoration: none; color: #333; font-weight: bold; margin-right: 0px;">
+                            Messages
+                            
+                            <span id="global-unread-badge" style="position: absolute; top: -8px; right: -12px; background-color: #ff3b30; color: white; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 12px; line-height: 1; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(255, 59, 48, 0.3); display: {% if unread_count > 0 %}inline-block{% else %}none{% endif %};">
+                                {{ unread_count }}
+                            </span>
+                        </a>
                     {% endif %}
                     
                     <a href="{% url 'user:user_logout' %}">Logout</a>
@@ -183,8 +119,8 @@
                 });
             });
 
-            const searchInput = document.getElementById('live-search-input');
-            const dropdown = document.getElementById('search-results-dropdown');
+            const searchInput = document.getElementById('live-search-input') || document.getElementById('hero-search-input');
+            const dropdown = document.getElementById('search-results-dropdown') || document.getElementById('hero-search-dropdown');
             const categoryInput = document.querySelector('input[name="category"]'); // Grab category if it exists
 
             if (searchInput) {
@@ -248,6 +184,43 @@
             }
         });
     </script>
+    {% if user.is_authenticated %}
+        <script>
+            function checkUnreadMessages() {
+                fetch('/message/api/unread-count/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const badge = document.getElementById('global-unread-badge');
+                        if (badge) {
+                            if (data.unread_count > 0) {
+                                badge.innerText = data.unread_count;
+                                badge.style.display = 'inline-block'; // 显示红点
+                            } else {
+                                badge.style.display = 'none'; // 隐藏红点
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Radar Error:', error));
+            }
+            setInterval(checkUnreadMessages, 5000);
+            window.addEventListener('pageshow', function(event) {
+                // stop bfcache and hard disk cache
+                if (event.persisted) {
+                    window.location.reload();
+                    return;
+                }
+                
+                let perfEntries = performance.getEntriesByType("navigation");
+                if (perfEntries.length > 0) {
+                    let navType = perfEntries[0].type;
+                    // refresh if it's back_forward
+                    if (navType === "back_forward") {
+                        window.location.reload();
+                    }
+                }
+            });
+        </script>
+    {% endif %}
 </body>
 </html>
 </body>

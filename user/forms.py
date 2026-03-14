@@ -29,6 +29,14 @@ class UserLoginForm(forms.Form):
 
 
 class UserRegisterForm(forms.ModelForm):
+    address = forms.CharField(
+        label="Delivery Address",
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control', 
+            'placeholder': 'e.g. 100 University Avenue, Glasgow, G12 8QQ'
+        })
+    )
     role = forms.ChoiceField(
         choices=Profile.Role.choices,
         label="I want to register as a:",
@@ -95,5 +103,6 @@ class UserRegisterForm(forms.ModelForm):
         if commit:
             user.save()
             user.profile.role = self.cleaned_data.get('role')
+            user.profile.address = self.cleaned_data.get('address')
             user.profile.save()
         return user

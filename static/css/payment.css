@@ -1,0 +1,138 @@
+
+/* payment order */
+.checkout-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+.checkout-card {
+    background: #fff;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    padding: 40px;
+    text-align: center;
+}
+.checkout-header h2 {
+    margin: 0; font-size: 28px; color: #333;
+}
+.checkout-header p {
+    color: #888; font-size: 14px; margin-top: 5px; margin-bottom: 30px;
+}
+.receipt-box {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: left;
+    margin-bottom: 30px;
+}
+.receipt-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: #555;
+}
+.receipt-row.total {
+    border-top: 1px dashed #ccc;
+    margin-top: 15px;
+    padding-top: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+.receipt-row.total .price {
+    color: #28a745;
+    font-size: 24px;
+}
+.btn-pay-now {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+    color: #fff !important;
+    font-weight: bold;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.25);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+    transform: translateZ(0);
+}
+.btn-pay-now:hover {
+    transform: translateY(-3px) translateZ(0);
+    box-shadow: 0 12px 28px rgba(40, 167, 69, 0.45);
+}
+.cancel-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: #999;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+.cancel-link:hover { color: #dc3545; }
+
+/* payment success page */
+
+.status-card {
+    max-width: 450px;
+    margin: 80px auto;
+    background: #fff;
+    padding: 50px 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+    text-align: center;
+}
+.icon-success {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+.status-card h2 { color: #333; margin-top: 0; }
+.status-card p { color: #666; line-height: 1.6; margin-bottom: 30px; }
+
+.btn-publish.wide {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 15px;
+}
+
+/* payment failure page */
+
+.status-card-failure {
+    max-width: 450px;
+    margin: 80px auto;
+    background: #fff;
+    padding: 50px 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+    text-align: center;
+    border-top: 5px solid #dc3545;
+}
+.icon-failed {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+
+.btn-retry {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 15px;
+    border-radius: 12px;
+    background: #f8f9fa;
+    color: #333;
+    font-weight: bold;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    transition: all 0.2s;
+}
+.btn-retry:hover {
+    background: #e2e6ea;
+    border-color: #dae0e5;
+}

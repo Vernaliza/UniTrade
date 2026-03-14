@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Your Email - UniTrade{% endblock %}
+
+{% block content %}
+<div style="max-width: 720px; margin: 60px auto; background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); text-align: center;">
+    <h2 style="margin-bottom: 12px;">Check your email</h2>
+    <p style="color: #666; line-height: 1.7;">
+        We sent a verification link to your academic email address.
+        You must verify that email before you can use your new account.
+    </p>
+    <p style="color: #666; line-height: 1.7;">
+        Only email addresses ending in <strong>.ac.uk</strong> are allowed.
+    </p>
+    <a href="{% url 'account_login' %}" class="btn-publish" style="display:inline-block; margin-top: 18px;">Back to login</a>
+</div>
+{% endblock %}

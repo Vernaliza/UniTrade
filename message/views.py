@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden
 from django.db.models import Q
 from django.utils import timezone
+from django.core.cache import cache
 from item.models import Item
 from .models import Conversation, Message, Notification, UserPresence
 
@@ -45,7 +46,7 @@ def get_last_seen_display(user):
 
 
 #watch message list | 查看消息列表
-@login_required
+@login_required(login_url='/user/login/')
 def message_list(request):
     conversations = Conversation.objects.filter(
         Q(buyer=request.user) | Q(seller=request.user)
@@ -78,7 +79,7 @@ def message_list(request):
 
 
 #display the chat details page of a specific conversation | 显示某一个具体会话的聊天详情页
-@login_required
+@login_required(login_url='/user/login/')
 def message_detail(request):
     conversation_id = request.GET.get('conversation_id')
     if not conversation_id:
@@ -93,9 +94,13 @@ def message_detail(request):
     if not is_conversation_participant(request.user, conversation):
         return HttpResponseForbidden("You are not allowed to view this conversation.")
 
-    messages = conversation.messages.select_related('sender').order_by('created_at')
+    # Currently are watching this conversation, message bar will not send.
+    cache.set(f'user_{request.user.id}_watching', str(conversation.id), timeout=10)
+    Notification.objects.filter(user=request.user, conversation=conversation, is_read=False).update(is_read=True)
 
-    messages.filter(
+    chat_messages = conversation.messages.select_related('sender').order_by('created_at')
+
+    chat_messages.filter(
         is_read=False
     ).exclude(
         sender=request.user
@@ -111,14 +116,14 @@ def message_detail(request):
 
     return render(request, 'message/message_detail.html', {
         'conversation': conversation,
-        'messages': messages,
+        'chat_messages': chat_messages,
         'other_user': other_user,
         'other_user_online': is_user_online(other_user),
         'other_user_status': get_last_seen_display(other_user),
     })
 
 #initiate a chat from the product page | 从商品页面发起聊天
-@login_required
+@login_required(login_url='/user/login/')
 def message_start(request):
     item_id = request.GET.get('item_id')
     if not item_id:
@@ -139,8 +144,7 @@ def message_start(request):
     return redirect(f'/message/detail/?conversation_id={conversation.id}')
 
 
-#send message | 发送一条消息
-@login_required
+@login_required(login_url='/user/login/')
 def message_send(request):
     if request.method != 'POST':
         return redirect('/message/list/')
@@ -158,20 +162,41 @@ def message_send(request):
         django_messages.warning(request, 'Message cannot be empty.')
         return redirect(f'/message/detail/?conversation_id={conversation.id}')
 
-    new_message = Message.objects.create(conversation=conversation, sender=request.user, text=text if text else None, image=image if image else None, is_read=False)
+    new_message = Message.objects.create(
+        conversation=conversation, 
+        sender=request.user, 
+        text=text if text else None, 
+        image=image if image else None, 
+        is_read=False
+    )
 
     conversation.updated_at = timezone.now()
     conversation.save(update_fields=['updated_at'])
 
     receiver = conversation.seller if request.user == conversation.buyer else conversation.buyer
 
-    Notification.objects.create(user=receiver, conversation=conversation, message=new_message, content=f'{request.user.username} sent you a new message')
+    is_receiver_watching = cache.get(f'user_{receiver.id}_watching') == str(conversation.id)
 
+    if not is_receiver_watching:
+        Notification.objects.update_or_create(
+            user=receiver, 
+            conversation=conversation, 
+            is_read=False,
+            defaults={
+                'message': new_message,
+                'content': f'{request.user.username} sent you a new message',
+                'created_at': timezone.now()
+            }
+        )
+
+    # AJAX 无刷新发送消息
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('ajax'):
+        return JsonResponse({'status': 'ok'})
+        
     return redirect(f'/message/detail/?conversation_id={conversation.id}')
 
-
 #fetch new message | 拉取新消息
-@login_required
+@login_required(login_url='/user/login/')
 def message_fetch(request):
     conversation_id = request.GET.get('conversation_id')
     last_message_id = request.GET.get('last_message_id')
@@ -181,13 +206,17 @@ def message_fetch(request):
     if not is_conversation_participant(request.user, conversation):
         return JsonResponse({'error': 'Forbidden'}, status=403)
 
-    messages = conversation.messages.select_related('sender').order_by('created_at')
+    # 前端来拉消息 就把状态延续10秒
+    cache.set(f'user_{request.user.id}_watching', str(conversation.id), timeout=10)
+    # Notification.objects.filter(user=request.user, conversation=conversation, is_read=False).update(is_read=True)
+
+    chat_messages = conversation.messages.select_related('sender').order_by('created_at')
 
     if last_message_id:
-        messages = messages.filter(id__gt=last_message_id)
+        chat_messages = chat_messages.filter(id__gt=last_message_id)
 
     data = []
-    for msg in messages:
+    for msg in chat_messages:
         data.append({
             'id': msg.id,
             'sender': msg.sender.username,
@@ -213,14 +242,14 @@ def message_fetch(request):
     other_user = conversation.seller if request.user == conversation.buyer else conversation.buyer
 
     return JsonResponse({
-        'messages': data,
+        'chat_messages': data,
         'other_user_online': is_user_online(other_user),
         'other_user_status': get_last_seen_display(other_user),
     })
 
 
 #show notification list | 显示当前用户的消息通知列表
-@login_required
+@login_required(login_url='/user/login/')
 def message_notification(request):
     notifications = Notification.objects.filter(
         user=request.user
@@ -237,7 +266,7 @@ def message_notification(request):
 
 
 #when clicking on a notification, mark it as read and redirect it to the corresponding chat page | 点开某一条通知时，把它标记为已读，并跳转到对应聊天页
-@login_required
+@login_required(login_url='/user/login/')
 def message_notification_read(request, notification_id):
     notification = get_object_or_404(Notification, id=notification_id, user=request.user)
     notification.is_read = True
@@ -250,3 +279,15 @@ def message_notification_read(request, notification_id):
         return redirect('order:order_detail', order_id=notification.order.id)
 
     return redirect('message_notification')
+
+# AJAX API for fetching unread message count | 获取未读消息数量的 AJAX API
+@login_required(login_url='/user/login/')
+def api_unread_count(request):
+    if request.user.is_authenticated:
+        count = Message.objects.filter(
+            Q(conversation__buyer=request.user) | Q(conversation__seller=request.user),
+            is_read=False
+        ).exclude(sender=request.user).count()
+        return JsonResponse({'unread_count': count})
+    
+    return JsonResponse({'unread_count': 0})
