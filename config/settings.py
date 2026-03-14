@@ -103,12 +103,22 @@ WSGI_APPLICATION = "config.wsgi.application"
 #         "NAME": BASE_DIR / "db.sqlite3",
 #     }
 # }
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         "NAME": "unitrade_db_0",
+#         "USER": "admin",
+#         "PASSWORD": "admin",
+#         "HOST": "unidb.cbww2mgac5hy.eu-west-2.rds.amazonaws.com",
+#         "PORT": "3306",
+#     }
+# }
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "unitrade_db_0",
-        "USER": "admin",
-        "PASSWORD": "admin",
+        "NAME": "test_chen",
+        "USER": "chen",
+        "PASSWORD": "123456",
         "HOST": "unidb.cbww2mgac5hy.eu-west-2.rds.amazonaws.com",
         "PORT": "3306",
     }
@@ -174,8 +184,8 @@ SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
-]
+
+]#"allauth.account.auth_backends.AuthenticationBackend",
 
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["username*", "email*", "password1*", "password2*"]
@@ -205,6 +215,6 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = "unitradeworld@outlook.com"
-EMAIL_HOST_PASSWORD = "Unitrade233"
+EMAIL_HOST_PASSWORD = "dlfxuxdbdvijtkoz"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
