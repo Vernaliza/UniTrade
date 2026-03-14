@@ -9,8 +9,11 @@
 <div class="hero-carousel-container">
     {% if banner_images %}
         {% for banner in banner_images %}
-            <div class="carousel-slide {% if forloop.first %}active{% endif %}" 
-                 style="background-image: url('{% static banner %}'); background-size: cover; background-position: center;">
+            <div class="carousel-slide {% if forloop.first %}active{% endif %}">
+                <img src="{% static banner %}" 
+                     class="hero-bg-img" 
+                     alt="Unitrade Banner"
+                     {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>
             </div>
         {% endfor %}
     {% else %}
@@ -23,10 +26,9 @@
         
         <form action="{% url 'item:item_search' %}" method="GET" class="hero-search-form" autocomplete="off">
             <input type="text" name="q" id="hero-search-input" autocomplete="off" class="hero-search-input" placeholder="What are you looking for today? (e.g. Textbooks, Monitor)">
-            <!-- <button type="submit" class="hero-search-btn">Search</button> -->
             <button type="submit" class="hero-search-btn">
                 <span class="search-text-desktop">Search</span>
-                <span class="search-icon-mobile" style="display: none;">🔍</span>
+                <span class="search-icon-mobile">🔍</span>
             </button>
             <div id="hero-search-dropdown"></div>
         </form>
@@ -97,6 +99,7 @@
         if (slides.length > 0) {
             let currentSlide = 0;
             setInterval(() => {
+                if (window.innerWidth <= 768) return;   // Only auto-slide on desktop
                 slides[currentSlide].classList.remove('active');
                 currentSlide = (currentSlide + 1) % slides.length;
                 slides[currentSlide].classList.add('active');

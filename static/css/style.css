@@ -8,6 +8,7 @@ nav { display: flex; justify-content: space-between; align-items: center; }
 
 .search-bar { flex-grow: 1; margin: 0 40px; position: relative; }
 .search-bar input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+.search-icon-mobile { display: none;}
 .search-dropdown {
     position: absolute; top: 100%; left: 0; width: 100%; background: white;
     border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -99,6 +100,19 @@ footer { text-align: center; padding: 20px; color: #666; border-top: 1px solid #
 }
 .btn-refuse:hover { background: #dc3545; color: #fff; }
 
+.hero-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    pointer-events: none;
+}
+
+.carousel-slide {
+    overflow: hidden; 
+}
+
 .hero-section {
     background: linear-gradient(135deg, #003865 0%, #00508f 100%);
     color: white;
@@ -166,10 +180,34 @@ footer { text-align: center; padding: 20px; color: #666; border-top: 1px solid #
     text-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
 
-.hero-search-form { width: 100%; max-width: 600px; display: flex; position: relative; gap: 8px;} /* add position: relative */
-.hero-search-input { flex: 1; padding: 15px; border-radius: 8px 0 0 8px; border: none; font-size: 16px; outline: none; }
-.hero-search-btn { padding: 15px 30px; border-radius: 0 8px 8px 0; border: none; background-color: rgb(255, 133, 57); color: #653d00; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 16px; } /*back ffb81c*/
-.hero-search-btn:hover { background-color: rgba(224, 117, 51, 0.9); } /*back e5a519*/
+.hero-search-form { 
+    width: 100%; 
+    max-width: 600px; 
+    display: flex; 
+    position: relative; 
+    gap: 8px;} /* add position: relative */
+.hero-search-input { 
+    flex: 1; 
+    padding: 15px; 
+    border-radius: 8px 0 0 8px; 
+    border: none; 
+    font-size: 16px; 
+    outline: none; 
+}
+.hero-search-btn { 
+    padding: 15px 30px; 
+    border-radius: 0 8px 8px 0; 
+    border: none; 
+    background-color: rgb(255, 133, 57); 
+    color: #653d00; 
+    font-weight: bold; 
+    cursor: pointer; 
+    transition: 0.2s; 
+    font-size: 16px; 
+} /*back ffb81c*/
+.hero-search-btn:hover { 
+    background-color: rgba(224, 117, 51, 0.9); 
+} /*back e5a519*/
 #hero-search-dropdown {
     display: none; 
     position: absolute; 
@@ -240,6 +278,15 @@ footer { text-align: center; padding: 20px; color: #666; border-top: 1px solid #
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     transition: all 0.3s ease;
 }
+
+.btn-back.icon-only {
+    padding: 8px;
+    width: 36px;
+    height: 36px;
+    justify-content: center; 
+    aspect-ratio: 1 / 1;
+}
+
 .icon-arrow {
     width: 16px;
     height: 16px;
@@ -275,7 +322,7 @@ footer { text-align: center; padding: 20px; color: #666; border-top: 1px solid #
     .sidebar.show-on-mobile { display: block !important; animation: fadeIn 0.3s; }
     .mobile-filter-btn { display: block !important; }
     
-    .detail-container { flex-direction: column !important; padding: 20px !important; gap: 20px !important; }
+    .detail-container { flex-direction: column !important; padding: 20px !important; gap: 20px !important; align-items: flex-start;}
     .seller-card { padding: 15px !important; }
     
     .publish-container { flex-direction: column !important; padding: 20px !important; gap: 20px !important; }
@@ -286,4 +333,7 @@ footer { text-align: center; padding: 20px; color: #666; border-top: 1px solid #
     .mobile-order-row { flex-direction: column !important; }
     .mobile-shipping-box { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
     .mobile-order-actions { margin-left: 0 !important; margin-top: 15px !important; width: 100% !important; }
+    .search-text-desktop {display: none;}
+    .search-icon-mobile {display: inline-block; font-size: 20px;}
+    .hero-search-btn {padding: 10px 15px !important; min-width: 50px;}
 }
