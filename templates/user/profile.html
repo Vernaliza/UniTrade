@@ -71,6 +71,10 @@
         <a href="{% url 'user:profile_edit' %}" style="display: block; width: 100%; box-sizing: border-box; text-align: center; margin: 0 auto; background: #17a2b8; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s;" onmouseover="this.style.background='#138496'" onmouseout="this.style.background='#17a2b8'">
             ✏️ Edit Profile
         </a>
+        
+        <a href="{% url 'user:change_password' %}" class="btn-change-password">
+            🔒 Change Password
+        </a>
     </div>
 </div>
 {% endblock %}
