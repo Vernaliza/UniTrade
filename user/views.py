@@ -7,6 +7,10 @@ from .forms import UserLoginForm, UserRegisterForm
 import random
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib.auth import update_session_auth_hash
+from .forms import PasswordChangeCustomForm
+from .models import Profile
+from django.views.decorators.http import require_POST
 
 # def user_login(request):
 #     if request.method == 'POST':
@@ -206,3 +210,46 @@ def profile_edit(request):
 
     # if GET request, show the edit form with current user info
     return render(request, 'user/profile_edit.html', {'user': request.user})
+
+
+@login_required
+def change_password(request):
+
+    if request.method == 'POST':
+        form = PasswordChangeCustomForm(request.user, request.POST)
+
+        if form.is_valid():
+            user = form.save()
+
+            update_session_auth_hash(request, user)
+
+            return redirect('user:profile')#I don't know where should we redirect. You can change it
+    else:
+        form = PasswordChangeCustomForm(request.user)
+
+    return render(request, 'user/change_password.html', {
+        'form': form
+    })
+
+
+
+@login_required
+@require_POST
+def toggle_role(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    if profile.role == Profile.Role.MERCHANT:
+        profile.role = Profile.Role.STUDENT
+        messages.success(request, 'Switched to Student/Buyer mode.')
+    else:
+        profile.role = Profile.Role.MERCHANT
+        messages.success(request, 'Switched to Merchant/Seller mode.')
+
+    profile.save()
+
+    next_url = request.POST.get('next')
+    return redirect(next_url or 'user:dashboard')
+
+@login_required
+def test_toggle_role(request):#just for test
+    return render(request, 'user/test_toggle_role.html')

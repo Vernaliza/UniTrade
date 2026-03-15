@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Role Toggle Test</title>
+</head>
+
+<body>
+
+<h2>Role Toggle Test Page</h2>
+
+{% if user.is_authenticated %}
+    <p>Username: {{ user.username }}</p>
+    <p>Current Role: {{ user.profile.role }}</p>
+
+    <form action="{% url 'user:toggle_role' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+
+        {% if user.profile.role == 'merchant' %}
+            <button type="submit">
+                Switch to Student
+            </button>
+        {% else %}
+            <button type="submit">
+                Switch to Merchant
+            </button>
+        {% endif %}
+    </form>
+
+{% else %}
+    <p>You are not logged in.</p>
+{% endif %}
+
+</body>
+</html>
