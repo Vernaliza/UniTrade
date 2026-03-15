@@ -80,18 +80,25 @@ def user_register(request):
             request.session['register_data'] = request.POST.dict()
             request.session['email_verification_code'] = code
 
-            if settings.DEBUG:#There will only be a pop-up window when debug=True! When debug=False, the captcha is in your terminal
-                messages.success(request, f'Test verification code: {code}')
-            else:
-                send_mail(
-                    subject='Your UniTrade verification code',
-                    message=f'Your verification code is: {code}',
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[form.cleaned_data['email']],
-                    fail_silently=False,
-                )
-                messages.success(request, 'Verification code has been sent to your email.')
-
+            # if settings.DEBUG:#There will only be a pop-up window when debug=True! When debug=False, the captcha is in your terminal
+            #     messages.success(request, f'Test verification code: {code}')
+            # else:
+            #     send_mail(
+            #         subject='Your UniTrade verification code',
+            #         message=f'Your verification code is: {code}',
+            #         from_email=settings.DEFAULT_FROM_EMAIL,
+            #         recipient_list=[form.cleaned_data['email']],
+            #         fail_silently=False,
+            #     )
+            #     messages.success(request, 'Verification code has been sent to your email.')
+            send_mail(
+                subject='Your UniTrade verification code',
+                message=f'Your verification code is: {code}',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[form.cleaned_data['email']],
+                fail_silently=False,
+            )
+            messages.success(request, 'Verification code has been sent to your email.')
             return redirect('user:verify_email')
     else:
         form = UserRegisterForm()

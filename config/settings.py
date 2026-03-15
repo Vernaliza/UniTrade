@@ -116,9 +116,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "test_chen",
-        "USER": "chen",
-        "PASSWORD": "123456",
+        "NAME": "unitrade_db_0",
+        "USER": "admin",
+        "PASSWORD": "admin",
         "HOST": "unidb.cbww2mgac5hy.eu-west-2.rds.amazonaws.com",
         "PORT": "3306",
     }
@@ -184,8 +184,8 @@ SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
-
-]#"allauth.account.auth_backends.AuthenticationBackend",
+    #"allauth.account.auth_backends.AuthenticationBackend",
+]
 
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["username*", "email*", "password1*", "password2*"]
@@ -209,13 +209,13 @@ LOGOUT_REDIRECT_URL = "/"
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"#for test
-#EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+#EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"#for test
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = "unitradeworldmail@gmail.com"
-EMAIL_HOST_PASSWORD = "dlfxuxdbdvijtkoz"
+EMAIL_HOST_PASSWORD = "cdmhibmzxsfeviej"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
