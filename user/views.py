@@ -13,6 +13,9 @@ from .models import Profile
 from django.views.decorators.http import require_POST
 from .forms import ForgotPasswordEmailForm, EmailCodeForm, ResetPasswordForm
 import time
+from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib import messages
+from django.shortcuts import render, redirect
 
 # def user_login(request):
 #     if request.method == 'POST':
@@ -34,26 +37,36 @@ import time
 #     return render(request, 'user/login.html', {'form': form})
 
 #user/views.py
+User = get_user_model()
+
 def user_login(request):
     if request.method == 'POST':
         form = UserLoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
+            account = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            user = authenticate(username=username, password=password)
+
+            user = None
+            if '@' in account:
+                try:
+                    user_obj = User.objects.get(email=account)
+                    user = authenticate(request, username=user_obj.username, password=password)
+                except User.DoesNotExist:
+                    user = None
+            else:
+                user = authenticate(request, username=account, password=password)
+
             if user is not None:
                 login(request, user)
                 messages.success(request, 'Login successful!')
 
-                # NEW REDIRECT LOGIC
                 next_url = request.GET.get('next')
                 if next_url:
                     return redirect(next_url)
                 else:
-                    # This sends them to your dashboard_redirect logic!
                     return redirect('user:dashboard')
             else:
-                messages.error(request, 'Invalid username or password!')
+                messages.error(request, 'Invalid username/email/password!')
     else:
         form = UserLoginForm()
 
