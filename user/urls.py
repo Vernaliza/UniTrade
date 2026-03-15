@@ -13,4 +13,7 @@ urlpatterns = [
     path('change-password/', views.change_password, name='change_password'),
     path('toggle-role/', views.toggle_role, name='toggle_role'),
     path('test-toggle-role/', views.test_toggle_role, name='test_toggle_role'),
+    path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('verify-reset-code/', views.verify_reset_code, name='verify_reset_code'),
+    path('reset-password/', views.reset_password, name='reset_password'),
 ]

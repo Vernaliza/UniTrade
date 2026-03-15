@@ -11,6 +11,8 @@ from django.contrib.auth import update_session_auth_hash
 from .forms import PasswordChangeCustomForm
 from .models import Profile
 from django.views.decorators.http import require_POST
+from .forms import ForgotPasswordEmailForm, EmailCodeForm, ResetPasswordForm
+import time
 
 # def user_login(request):
 #     if request.method == 'POST':
@@ -232,7 +234,6 @@ def change_password(request):
     })
 
 
-
 @login_required
 @require_POST
 def toggle_role(request):
@@ -253,3 +254,90 @@ def toggle_role(request):
 @login_required
 def test_toggle_role(request):#just for test
     return render(request, 'user/test_toggle_role.html')
+
+
+def forgot_password(request):
+    if request.method == 'POST':
+        form = ForgotPasswordEmailForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            code = str(random.randint(100000, 999999))
+
+            request.session['reset_email'] = email
+            request.session['password_reset_code'] = code
+            request.session['password_reset_code_time'] = int(time.time())
+            request.session['password_reset_verified'] = False
+
+            send_mail(
+                subject='Your password reset verification code',
+                message=f'Your verification code is: {code}',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+
+            messages.success(request, 'Verification code has been sent to your email.')
+            return redirect('user:verify_reset_code')
+    else:
+        form = ForgotPasswordEmailForm()
+
+    return render(request, 'user/forgot_password.html', {'form': form})
+
+
+def verify_reset_code(request):
+    if request.method == 'POST':
+        form = EmailCodeForm(request.POST)
+        if form.is_valid():
+            user_code = form.cleaned_data['code']
+            real_code = request.session.get('password_reset_code')
+            code_time = request.session.get('password_reset_code_time')
+
+            if not real_code or not code_time:
+                messages.error(request, 'Session expired. Please request a new code.')
+                return redirect('user:forgot_password')
+
+            # if int(time.time()) - code_time > 300:
+            #     messages.error(request, 'Verification code expired. Please request a new code.')
+            #     return redirect('user:forgot_password')
+
+            if user_code == real_code:
+                request.session['password_reset_verified'] = True
+                messages.success(request, 'Verification successful. Please reset your password.')
+                return redirect('user:reset_password')
+            else:
+                messages.error(request, 'Invalid verification code.')
+    else:
+        form = EmailCodeForm()
+
+    return render(request, 'user/verify_reset_code.html', {'form': form})
+
+
+def reset_password(request):
+
+    if not request.session.get('password_reset_verified'):
+        return redirect('user:forgot_password')
+
+    email = request.session.get('reset_email')
+    user = User.objects.get(email=email)
+
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.POST)
+
+        if form.is_valid():
+            user.set_password(form.cleaned_data['new_password1'])
+            user.save()
+
+            request.session.pop('reset_email', None)
+            request.session.pop('password_reset_code', None)
+            request.session.pop('password_reset_code_time', None)
+            request.session.pop('password_reset_verified', None)
+
+            messages.success(request, "Password reset successful. Please log in.")
+
+            return redirect('user:user_login')
+
+    else:
+        form = ResetPasswordForm()
+
+    return render(request, 'user/reset_password.html', {'form': form})
+
