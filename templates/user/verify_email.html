@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Email Verification - UniTrade{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/user.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+    {% for message in messages %}
+        <script>
+            alert("{{ message|escapejs }}");
+        </script>
+    {% endfor %}
+{% endif %}
+
+<div class="auth-container">
+    <div style="font-size: 40px; text-align: center; margin-bottom: 15px;">✉️</div>
+    
+    <h2 class="auth-title">Email Verification</h2>
+    
+    <p style="text-align: center; color: #666; margin-bottom: 25px; line-height: 1.5;">
+        Please enter the verification code sent to your email address.
+    </p>
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        <p>
+            <label for="code">Enter verification code:</label>
+            <input type="text" name="code" id="code" required placeholder="e.g. 123456">
+        </p>
+        
+        <button type="submit" class="btn-submit" style="background-color: #d86800; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Verify
+        </button>
+    </form>
+</div>
+
+{% endblock %}
