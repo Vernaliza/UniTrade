@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import Profile
-# I put some functions that user app may use here
+from django.contrib.auth.forms import PasswordChangeForm
+#I put some functions that user app may use here
 
 class UserLoginForm(forms.Form):
     username = forms.CharField(
@@ -106,3 +107,19 @@ class UserRegisterForm(forms.ModelForm):
             user.profile.address = self.cleaned_data.get('address')
             user.profile.save()
         return user
+
+class PasswordChangeCustomForm(PasswordChangeForm):
+    old_password = forms.CharField(
+        label="Old Password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+
+    new_password1 = forms.CharField(
+        label="New Password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+
+    new_password2 = forms.CharField(
+        label="Confirm New Password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )

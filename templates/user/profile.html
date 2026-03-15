@@ -32,6 +32,22 @@
 
     <h2 style="margin: 0; color: #333;">{{ user.username }}</h2>
     <p style="color: #666; margin-top: 5px;">Role: <span style="font-weight: bold; color: #28a745;">{{ user.profile.role|title|default:"Student" }}</span></p>
+    <form action="{% url 'user:toggle_role' %}" method="post" style="margin-top:15px;">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+
+        {% if user.profile.role == 'merchant' %}
+            <button type="submit"
+                    style="padding:8px 14px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;">
+                Switch to Student
+            </button>
+        {% else %}
+            <button type="submit"
+                    style="padding:8px 14px;background:#198754;color:white;border:none;border-radius:6px;cursor:pointer;">
+                Switch to Merchant
+            </button>
+        {% endif %}
+    </form>
 </div>
 
 <style>
