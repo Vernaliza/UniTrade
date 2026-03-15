@@ -10,9 +10,10 @@ from django.contrib.auth.password_validation import validate_password
 
 class UserLoginForm(forms.Form):
     username = forms.CharField(
+        label="Account",
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Username'
+            'placeholder': 'Username / email'
         })
     )
     password = forms.CharField(
@@ -28,7 +29,7 @@ class UserLoginForm(forms.Form):
         password = cleaned_data.get('password')
 
         if not username or not password:
-            raise forms.ValidationError('Please enter both username and password.')
+            raise forms.ValidationError('Please enter both account and password.')
 
         return cleaned_data
 

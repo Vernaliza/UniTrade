@@ -123,7 +123,7 @@ DATABASES = {
         "PORT": "3306",
     }
 }
-#Read local configuration "local_settings.py" | 读取本地配置
+# #Read local configuration "local_settings.py" | 读取本地配置
 try:
     from .local_settings import *
 except ImportError:
