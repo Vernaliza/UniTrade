@@ -32,6 +32,22 @@
 
     <h2 style="margin: 0; color: #333;">{{ user.username }}</h2>
     <p style="color: #666; margin-top: 5px;">Role: <span style="font-weight: bold; color: #28a745;">{{ user.profile.role|title|default:"Student" }}</span></p>
+    <form action="{% url 'user:toggle_role' %}" method="post" style="margin-top:15px;">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+
+        {% if user.profile.role == 'merchant' %}
+            <button type="submit"
+                    style="padding:8px 14px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;">
+                Switch to Student
+            </button>
+        {% else %}
+            <button type="submit"
+                    style="padding:8px 14px;background:#198754;color:white;border:none;border-radius:6px;cursor:pointer;">
+                Switch to Merchant
+            </button>
+        {% endif %}
+    </form>
 </div>
 
 <style>
@@ -54,6 +70,10 @@
 
         <a href="{% url 'user:profile_edit' %}" style="display: block; width: 100%; box-sizing: border-box; text-align: center; margin: 0 auto; background: #17a2b8; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s;" onmouseover="this.style.background='#138496'" onmouseout="this.style.background='#17a2b8'">
             ✏️ Edit Profile
+        </a>
+        
+        <a href="{% url 'user:change_password' %}" class="btn-change-password">
+            🔒 Change Password
         </a>
     </div>
 </div>

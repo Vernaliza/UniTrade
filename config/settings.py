@@ -106,9 +106,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.mysql",
-#         "NAME": "unitrade_db_0",
-#         "USER": "admin",
-#         "PASSWORD": "admin",
+#         "NAME": "test_chen",
+#         "USER": "chen",
+#         "PASSWORD": "123456",
 #         "HOST": "unidb.cbww2mgac5hy.eu-west-2.rds.amazonaws.com",
 #         "PORT": "3306",
 #     }
@@ -123,7 +123,7 @@ DATABASES = {
         "PORT": "3306",
     }
 }
-#Read local configuration "local_settings.py" | 读取本地配置
+# #Read local configuration "local_settings.py" | 读取本地配置
 try:
     from .local_settings import *
 except ImportError:
