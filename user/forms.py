@@ -136,7 +136,7 @@ class ForgotPasswordEmailForm(forms.Form):
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
             'placeholder': 'Enter your registered email',
-            'style': 'width:400px;'
+            # 'style': 'width:400px;'
         })
     )
 
